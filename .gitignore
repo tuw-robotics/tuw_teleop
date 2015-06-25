@@ -26,3 +26,20 @@
 *.exe
 *.out
 *.app
+
+# ROS
+build
+devel
+
+# CMake
+CMakeCache.txt
+CMakeFiles
+Makefile
+cmake_install.cmake
+install_manifest.txt
+
+# Kdevelop
+*.kdev4
+.kdev4*
+*~
+*swp
