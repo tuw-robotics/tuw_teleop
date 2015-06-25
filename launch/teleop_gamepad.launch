@@ -1,34 +1,38 @@
 <launch>
+  <!-- Parameters for a Logitech F710 Gamepad, "MODE" = off and "XID/HID Switch" = X -->
 
   <arg name="robot_name" default="" />
-  <arg name="max_vw" default="2" />
   <arg name="max_vx" default="2" />
   <arg name="max_vy" default="0" />
+  <arg name="max_vw" default="2" />
+  <arg name="scale"  default="2" />
 
   <!-- run the teleop node to send velocities -->
-  <node pkg="tuw_teleop" type="joy2cmd" name="teleop"  output="screen" >
+  <node pkg="tuw_teleop" type="joy2twist" name="teleop"  output="screen" >
 
     <param name="debug" value="true" />
+    <param name="deadman_button" type="int" value="5" />
+    <param name="scale_button" type="int" value="2" />
     
     <!-- -1 means off -->
     <param name="axis_vx" value="1" />
     <param name="axis_vy" value="-1" />
     <param name="axis_vw" value="0" />
 
-    <param name="axis_vx_discrete" value="5" />
+    <param name="axis_vx_discrete" value="7" />
     <param name="axis_vy_discrete" value="-1" />
-    <param name="axis_vw_discrete" value="4" />
+    <param name="axis_vw_discrete" value="6" />
 
     <param name="max_vx" value="$(arg max_vx)" />
     <param name="max_vy" value="$(arg max_vy)" />
     <param name="max_vw" value="$(arg max_vw)" />
+    <param name="scale" value="$(arg scale)" />
 
-    <param name="deadman_button" type="int" value="5" />
 
     <remap from="des_vel" to="$(arg robot_name)/base_controller/command" />
     <remap from="cmd_vel" to="$(arg robot_name)/cmd_vel" />
   </node>
 
   <!-- run a joy node -->
-  <node pkg="joy" type="joy_node" name="pioneer_joy_controller" />
+  <node pkg="joy" type="joy_node" name="joy_controller" />
 </launch>
