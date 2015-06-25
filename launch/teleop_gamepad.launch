@@ -10,7 +10,7 @@
   <!-- run the teleop node to send velocities -->
   <node pkg="tuw_teleop" type="joy2twist" name="teleop"  output="screen" >
 
-    <param name="debug" value="true" />
+    <param name="debug" value="false" />
     <param name="deadman_button" type="int" value="5" />
     <param name="scale_button" type="int" value="2" />
     
