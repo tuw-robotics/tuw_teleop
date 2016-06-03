@@ -1,6 +1,6 @@
 # tuw_teleop
-A simple node to teleoperate a vehile with twist messages. 
+A simple node to teleoperate vehiles. 
 
-#sample: 
+# tuw_joy2twist: 
 it works with a Logitech F710 Gamepad 
-- roslaunch tuw_teleop teleop_gamepad.launch 
+- roslaunch tuw_joy2twist teleop_gamepad.launch 
