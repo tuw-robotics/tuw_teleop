@@ -1,0 +1,11 @@
+<launch>
+  
+  <arg name="name" default="blue" />
+  
+  <group ns="$(arg name)">
+    <node pkg="tuw_gui2iws" type="tuw_gui2iws_node" name="tuw_gui2iws_node" output="screen">
+      <param name ="/use_sim_time" value="true"/>
+    </node>
+  </group>
+  
+</launch>
