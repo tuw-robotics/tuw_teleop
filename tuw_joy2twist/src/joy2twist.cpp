@@ -1,5 +1,5 @@
 /**
- * @file joy2cmd.cpp
+ * @file joy2cmd_.cpp
  * @author Markus Bader <markus.bader@tuwien.ac.at>
  * @date June 2015
  * @brief Generates twist messages based on joy messages
@@ -23,7 +23,7 @@ class Joy2Twist {
 public:
     ros::NodeHandle n_;
     ros::NodeHandle n_param_;
-    geometry_msgs::Twist cmd, passthrough_cmd;
+    geometry_msgs::Twist cmd_, cmd_passthrough_;
     bool debug;
     double scale;
     double req_vx, req_vy, req_vw, req_scale;
@@ -37,9 +37,9 @@ public:
     ros::Time last_recieved_joy_message_time_;
     ros::Duration joy_msg_timeout_;
 
-    ros::Publisher vel_pub_;
-    ros::Subscriber joy_sub_;
-    ros::Subscriber passthrough_sub_;
+    ros::Publisher pub_cmd_;
+    ros::Subscriber sub_joy_;
+    ros::Subscriber sub_cmd_passthrough_;
 
     Joy2Twist ( ros::NodeHandle & n, bool deadman_no_publish = false ) :
         n_ ( n ), n_param_ ( "~" ), 
@@ -48,7 +48,7 @@ public:
     }
 
     void init() {
-        cmd.linear.x = cmd.linear.y = cmd.angular.z = 0.0;
+        cmd_.linear.x = cmd_.linear.y = cmd_.angular.z = 0.0;
 	
         n_param_.param ( "debug", debug, false );
 	
@@ -99,20 +99,19 @@ public:
 
 
 
-        vel_pub_ = n_.advertise < geometry_msgs::Twist > ( "cmd_vel", 1 );
-        passthrough_sub_ = n_.subscribe ( "des_vel", 10,
-                                          &Joy2Twist::passthrough_cb, this );
-        joy_sub_ = n_.subscribe ( "joy", 10, &Joy2Twist::joy_cb, this );
+        pub_cmd_ = n_.advertise < geometry_msgs::Twist > ( "cmd_vel", 1 );
+        sub_cmd_passthrough_ = n_.subscribe ( "cmd_passthrough", 10, &Joy2Twist::callback_cmd_passthrough, this );
+        sub_joy_ = n_.subscribe ( "joy", 10, &Joy2Twist::joy_cb, this );
 
     }
 
     ~Joy2Twist() {
     }
 
-    void passthrough_cb ( const geometry_msgs::TwistConstPtr& pass_msg ) {
-        ROS_DEBUG ( "passthrough_cmd: [%f,%f]", passthrough_cmd.linear.x,
-                    passthrough_cmd.angular.z );
-        passthrough_cmd = *pass_msg;
+    void callback_cmd_passthrough ( const geometry_msgs::TwistConstPtr& pass_msg ) {
+        ROS_DEBUG ( "cmd_passthrough_: [%f,%f]", cmd_passthrough_.linear.x,
+                    cmd_passthrough_.angular.z );
+        cmd_passthrough_ = *pass_msg;
     }
 
     bool buttonsOK ( const sensor_msgs::Joy::ConstPtr& joy_msg ) {
@@ -234,16 +233,16 @@ public:
 
     void send_cmd_vel() {
         if ( deadman_ && (last_recieved_joy_message_time_ + joy_msg_timeout_  > ros::Time::now()) ) {
-            cmd.linear.x = req_vx;
-            cmd.linear.y = req_vy;
-            cmd.angular.z = req_vw;
-            vel_pub_.publish ( cmd );
+            cmd_.linear.x = req_vx;
+            cmd_.linear.y = req_vy;
+            cmd_.angular.z = req_vw;
+            pub_cmd_.publish ( cmd_ );
         } else {
-            //cmd.linear.x = cmd.linear.y = cmd.angular.z = 0;
-            cmd = passthrough_cmd;
+            //cmd_.linear.x = cmd_.linear.y = cmd_.angular.z = 0;
+            cmd_ = cmd_passthrough_;
             //if (!deadman_no_publish_)
             {
-                vel_pub_.publish ( cmd ); //Only publish if deadman_no_publish is enabled
+                pub_cmd_.publish ( cmd_ ); //Only publish if deadman_no_publish is enabled
 
             }
         }
