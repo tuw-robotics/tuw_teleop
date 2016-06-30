@@ -26,7 +26,7 @@ message(${CURSES_LIBRARY})
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES tuw_keyboard2twist_node
+  LIBRARIES tuw_keyboard2twist tuw_keyboard2twist_node
 # CATKIN_DEPENDS tuw_gazebo_plugins
   DEPENDS OpenCV
 )
@@ -41,5 +41,5 @@ add_dependencies     (tuw_keyboard2twist ${${PROJECT_NAME}_EXPORTED_TARGETS} ${c
 target_link_libraries(tuw_keyboard2twist ${OpenCV_LIBS} ${CURSES_LIBRARY} )
 
 add_executable       (tuw_keyboard2twist_node src/tuw_keyboard2twist_node.cpp)
-add_dependencies     (tuw_keyboard2twist_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg )
+add_dependencies     (tuw_keyboard2twist_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} )
 target_link_libraries(tuw_keyboard2twist_node tuw_keyboard2twist ${catkin_LIBRARIES} ${CURSES_LIBRARY} )
