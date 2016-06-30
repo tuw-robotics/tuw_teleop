@@ -14,7 +14,6 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   dynamic_reconfigure 
   tuw_geometry
-  tuw_gazebo_plugins
 )
 
 
@@ -28,7 +27,7 @@ message(${CURSES_LIBRARY})
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES tuw_keyboard2twist_node
-  CATKIN_DEPENDS tuw_gazebo_plugins
+# CATKIN_DEPENDS tuw_gazebo_plugins
   DEPENDS OpenCV
 )
 

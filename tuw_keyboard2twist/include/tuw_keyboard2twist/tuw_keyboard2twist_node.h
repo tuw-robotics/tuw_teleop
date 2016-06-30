@@ -24,7 +24,6 @@
 
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
-#include <sensor_msgs/LaserScan.h>
 
 #include <tuw_keyboard2twist/tuw_keyboard2twist.h>
 
@@ -39,20 +38,19 @@ public:
 
     Keyboard2TwistNode (ros::NodeHandle & n);
     ~Keyboard2TwistNode ();
-    double frequency() {
-        return frequency_;
+    double frequency() { 
+      return frequency_;
     }
-	bool cancel(){
-	  return cancel_;
-	};
-    void publishCmd() ;
-    void callbackLaser (const sensor_msgs::LaserScan&);   
+    bool cancel(){
+      return cancel_;
+    };
+    void publishCmd() ;  
 private:
-	ros::NodeHandle n_;
+    ros::NodeHandle n_;
     ros::NodeHandle n_param_;
     double frequency_;    
-	bool cancel_;
-	bool secureMode_;
+    bool cancel_;
+    bool secureMode_;
     ros::Publisher pub_cmd_;
     ros::Subscriber sub_laser_;
 };

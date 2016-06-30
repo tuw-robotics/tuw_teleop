@@ -83,18 +83,7 @@ Keyboard2TwistNode::Keyboard2TwistNode ( ros::NodeHandle & n ) :
 		quit_ = true;
     }
 
-    sub_laser_ = n.subscribe("laser", 1, &Keyboard2TwistNode::callbackLaser, this);
-    switch(control_mode_){
-	  case TELEOP:
-		initTeleop();
-		break;
-	  case WANDERER:
-        /// subscribers to laser sensor
-		initWanderer();
-		break;
-	  default:
-		quit_ = true;
-	}
+    initTeleop();
 }
 
 Keyboard2TwistNode::~Keyboard2TwistNode () {
@@ -106,21 +95,4 @@ void Keyboard2TwistNode::publishCmd () {
     twist.linear.x = cmd_.v();
     twist.angular.z = cmd_.w();
     pub_cmd_.publish ( twist );
-}
-
-
-/**
- * copies incoming laser messages to the base class
- * @param laser
- **/
-void Keyboard2TwistNode::callbackLaser (const sensor_msgs::LaserScan &laser) {
-    int nr = (laser.angle_max - laser.angle_min) / laser.angle_increment;
-    laser_.resize(nr);
-    laser_angle_.resize(nr);
-    for(int i = 0; i < nr; i++){
-      laser_[i] = laser.ranges[i];
-      laser_angle_[i] = laser.angle_min + ( laser.angle_increment * i );
-    }
-    laserListener();
-	std::cout << "dd\n";
 }

@@ -66,8 +66,6 @@ public:
 	int control_mode() const {return control_mode_;}
 	bool quit() const {return quit_;}
 	void initTeleop();
-	void initWanderer();
-	void laserListener();
 protected:
 	bool quit_;
 	int control_mode_;

@@ -61,9 +61,6 @@ int getch_noblock()
   return c;
 }
 
-
-
-
 void Keyboard2Twist::keyboardListener() {
     int key;
     int row,col;
@@ -135,28 +132,6 @@ void Keyboard2Twist::keyboardListener() {
 }
 
 
-void Keyboard2Twist::laserListener() {
-   boost::interprocess::scoped_lock<boost::mutex> scoped_lock ( mutex_ );
-    cmd_.stop();
-    int right_idx = laser_.size() / 4;
-    int left_idx =  (laser_.size() / 4)*3;
-    double v = velocity_forward_;
-    double w = velocity_angular_;
-    for(int i = right_idx; i < left_idx; i++){
-        if (laser_[i] < 1.0){
-            v = velocity_forward_/2.0;
-            w = velocity_angular_/2.0;
-        }
-    }
-    if(laser_[right_idx] < 1.0){
-      cmd_.w(-w);
-    } else if(laser_[left_idx] < 1.0){
-        cmd_.w(w);
-    } else {
-      cmd_.v(v);
-    }
-}
-
 void Keyboard2Twist::initTeleop() {
 
     initscr();                        // Start curses mode
@@ -166,7 +141,4 @@ void Keyboard2Twist::initTeleop() {
     int row,col;
     char mesg[0xFF];
     t1 = boost::thread ( &Keyboard2Twist::keyboardListener, this );
-}
-void Keyboard2Twist::initWanderer(){
-    
 }
