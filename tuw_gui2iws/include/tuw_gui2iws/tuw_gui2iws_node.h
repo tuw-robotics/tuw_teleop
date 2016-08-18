@@ -35,6 +35,7 @@
 #define GUI_2_IWS_NODE_H
 
 #include <ros/ros.h>
+#include <tf/transform_listener.h>
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Pose2D.h>
 #include <nav_msgs/Odometry.h>
@@ -42,25 +43,25 @@
 #include <sensor_msgs/JointState.h>
 #include <dynamic_reconfigure/server.h>
 
-#include <tuw_gazebo_msgs/IwsCmd_VRAT.h>
+#include <tuw_iws_msgs/IwsCmd_VRAT_Vec.h>
 #include <tuw_gui2iws/tuw_gui2iws.h>
 
-
+namespace tuw {
 /**
  * class to cover the ros communication
  **/
 class Gui2IwsNode : public Gui2Iws {
 public:
     Gui2IwsNode ( ros::NodeHandle & n ); /// Constructor
-    void publishJntsCmds ();      /// publishes the motion commands 
+    void publishJntsCmds ();      /// publishes the motion commands
 private:
     ros::NodeHandle n_;         /// node handler to the root node
     ros::NodeHandle n_param_;   /// node handler to the current node
     //ros::Subscriber sub_laser_; /// Subscriber to the laser measurements
     ros::Publisher pub_jnts_cmds_;    /// publisher for the motion commands
-    
+
     ros::Publisher pub_jnts_cmd_;    /// publisher for the motion commands
-    
+
     ros::Subscriber sub_joint_states_;
     ros::Subscriber sub_odometry_;
     ros::Subscriber sub_cmds_;
@@ -70,6 +71,12 @@ private:
     void callbackConfigBlueControl ( tuw_teleop::Gui2IwsConfig &config, uint32_t level ); /// callback function on incoming parameter changes
     dynamic_reconfigure::Server<tuw_teleop::Gui2IwsConfig> reconfigureServer_; /// parameter server stuff
     dynamic_reconfigure::Server<tuw_teleop::Gui2IwsConfig>::CallbackType reconfigureFnc_;  /// parameter server stuff
+    
+    std::shared_ptr<tf::TransformListener> tf_listener_;
+    
+    double xBody, yBody, aBody;
 };
+
+}
 
 #endif // GUI_2_IWS_NODE_H

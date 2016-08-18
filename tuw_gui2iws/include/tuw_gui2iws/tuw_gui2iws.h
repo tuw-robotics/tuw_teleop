@@ -39,10 +39,11 @@
 #include <opencv2/opencv.hpp>
 
 #include <tuw_geometry/tuw_geometry.h>
-#include <tuw_gazebo_plugins/gazebo_ros_iws_drive/iws/iws_utils.h>
-#include <tuw_gazebo_plugins/gazebo_ros_iws_drive/iws/iws_feed_fwd_control_vrp.h>
+#include <tuw_i2ws_flat_ctrl/iws_param_funcs_vrp_to_state_ch.h>
 
-#include <tuw_teleop/Gui2IwsConfig.h>
+#include <tuw_gui2iws/Gui2IwsConfig.h>
+
+namespace tuw {
 
 double rad2deg(double angle_rad){
     return (angle_rad*180.0)/(double)M_PI;
@@ -61,22 +62,6 @@ double sgn(double x){
     else    { return -1; }
 }
 
-class LinkData{
-public:
-    double lx;
-    double ly;
-    double lz;
-    double maxTorque;
-    double hiStop;
-    double loStop;
-    LinkData():lx(0),ly(0),lz(0),maxTorque(-1),hiStop(-1),loStop(-1){}
-};
-  
-class LegData{
-public:
-    LinkData link[3];
-};
-
 class CurrentState{
 public:
     tuw::Polar2D ICC;
@@ -91,7 +76,7 @@ public:
     void initFigure(std::size_t pix_size, int radius_size, double grid_size);
     void plot();                         /// plots sensor input
 
-    LegData legInfo[4];
+    std::vector<cv::Point2d> legInfo;
     
     static void onMouseMap( int event, int x, int y, int flags, void* param );
 protected:
@@ -99,7 +84,6 @@ protected:
     //Command cmd_;  /// output variables  v, w
     unsigned long loop_count_; /// counts the filter cycles
     
-    tuw::IwsSpSystem::LegArray<cv::Point2d> legPos_;
     double wheelRadius_;
     double wheelWidth_;
 
@@ -116,14 +100,13 @@ protected:
     
     double computeBodyStateTargetDeltaT();
     
-    tuw::IwsSpSystem::LegsJointsStates jointStates_;
+    enum class JointsTypes { REVOL, STEER, ENUM_SIZE };
+    std::vector<std::array<double, asInt(JointsTypes::ENUM_SIZE)> > jointStates_;
     
-    
-    tuw::IwsSpSystem::BodyState bodyStateTarget_;
-    tuw::IwsSpSystem::BodyState bodyStateBuffer_;
-    
-    tuw::IwsSpSystem::BodyState bodyStateNow_;
-    
+    enum class BodyVRP { V, RHO, PHI, ENUM_SIZE };
+    std::array<double, asInt(BodyVRP::ENUM_SIZE)> bodyStateTarget_;
+    std::array<double, asInt(BodyVRP::ENUM_SIZE)> bodyStateBuffer_;
+    std::array<double, asInt(BodyVRP::ENUM_SIZE)> bodyStateNow_;
     
     void plotLocal();      /// plots sensor input in robot coordinates
     
@@ -136,6 +119,8 @@ private:
     void initFigureRobotBase();
     void fillLocalPlot();
 };
+
+}
 
 #endif // GUI_2_IWS_H
 
