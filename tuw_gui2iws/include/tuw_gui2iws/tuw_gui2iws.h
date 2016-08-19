@@ -39,7 +39,7 @@
 #include <opencv2/opencv.hpp>
 
 #include <tuw_geometry/tuw_geometry.h>
-#include <tuw_i2ws_flat_ctrl/iws_param_funcs_vrp_to_state_ch.h>
+#include <tuw_iws_control/iws_param_funcs_vrp_to_state_ch.h>
 
 #include <tuw_gui2iws/Gui2IwsConfig.h>
 

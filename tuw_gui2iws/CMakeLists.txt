@@ -5,9 +5,9 @@ set(CMAKE_CXX_FLAGS "-std=c++14 ${CMAKE_CXX_FLAGS}")
 
 SET(CMAKE_BUILD_TYPE Debug)
 
-find_package(tuw_i2ws_flat_ctrl REQUIRED)
+find_package(tuw_iws_control REQUIRED)
 if(tuw_control_FOUND)
-  MESSAGE(STATUS "Found package tuw_i2ws_flat_ctrl, compiling also gui2iws_node !")
+  MESSAGE(STATUS "Found package tuw_iws_control, compiling also gui2iws_node !")
   
 	find_package(catkin REQUIRED COMPONENTS
 		geometry_msgs
@@ -19,7 +19,7 @@ if(tuw_control_FOUND)
 		tf
 		dynamic_reconfigure 
 		tuw_geometry
-		tuw_i2ws_flat_ctrl
+		tuw_iws_control
 	)
   
 	find_package(OpenCV REQUIRED)
@@ -35,7 +35,7 @@ if(tuw_control_FOUND)
     catkin_package(
 	  INCLUDE_DIRS include
 	  LIBRARIES tuw_gui2iws_node
-	  CATKIN_DEPENDS tuw_i2ws_flat_ctrl tuw_msgs
+	  CATKIN_DEPENDS tuw_iws_control tuw_msgs
 	  DEPENDS OpenCV
 	)
 

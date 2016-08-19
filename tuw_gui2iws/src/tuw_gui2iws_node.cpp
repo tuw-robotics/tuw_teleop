@@ -80,9 +80,11 @@ Gui2IwsNode::Gui2IwsNode ( ros::NodeHandle & n )
     n_param_ ( "~" ){
 
     pub_jnts_cmd_     = n.advertise<tuw_iws_msgs::IwsCmd_VRAT_Vec>("base_cmds"  , 1);
-    sub_joint_states_ = n.subscribe(      "joint_states", 1, &Gui2IwsNode::callbackJointStates, this );
+    sub_joint_states_ = n.subscribe(    "joint_measures", 1, &Gui2IwsNode::callbackJointStates, this );
     sub_odometry_     = n.subscribe(              "odom", 1, &Gui2IwsNode::callbackOdometry   , this );
 
+    n_param_.getParam( "steering_links", steeringLinkNames_);
+    
     tf_listener_ = std::make_shared<tf::TransformListener>();
     
     reconfigureFnc_ = boost::bind ( &Gui2IwsNode::callbackConfigBlueControl, this,  _1, _2 );
@@ -95,31 +97,23 @@ void Gui2IwsNode::callbackConfigBlueControl ( tuw_teleop::Gui2IwsConfig &config,
     init();
 }
 
-void Gui2IwsNode::callbackJointStates( const sensor_msgs::JointState::ConstPtr &joint_ ){
-    size_t jointStatesSize = joint_->name.size() / 2;
+void Gui2IwsNode::callbackJointStates( const tuw_iws_msgs::JointsIWS::ConstPtr &joint_ ){
+    size_t jointStatesSize = joint_->steering.size();
     jointStates_.resize(jointStatesSize);
     legInfo     .resize(jointStatesSize);
     for ( std::size_t i = 0; i < jointStates_.size(); i++ ) {
 	
 	tf::StampedTransform transform;
-	std::vector<std::string> substrings;
-	std::string linkName = joint_->name[i]; 
-	
-	typedef const boost::iterator_range<std::string::const_iterator> StringRange;
-	std::string a2("2");
-	if(!boost::find_first(StringRange(linkName.begin(), linkName.end()), StringRange(a2.begin(),a2.end()))){ return; }
-	boost::split(substrings, linkName, boost::is_any_of("2") );
-	boost::replace_all(substrings[1], "joint", "link"); 
 	try {
-	    tf_listener_->lookupTransform ( tf::resolve ( n_.getNamespace(), "base_link" ),  tf::resolve ( n_.getNamespace(), substrings[1] ), ros::Time ( 0 ), transform );
+	    tf_listener_->lookupTransform ( tf::resolve ( n_.getNamespace(), "base_link" ),  tf::resolve ( n_.getNamespace(), steeringLinkNames_[i] ), ros::Time ( 0 ), transform );
 	} catch ( tf::TransformException ex ) {
 	    ROS_ERROR ( "%s",ex.what() );
 	    continue;
 	}
 	legInfo[i] = cv::Point2d ( - transform.getOrigin().y(),  transform.getOrigin().x() );
 	
-	jointStates_[i][asInt(JointsTypes::REVOL)] = joint_->velocity[i];
-	jointStates_[i][asInt(JointsTypes::STEER)] = normalizeAngle(joint_->position[i+jointStatesSize]);
+	jointStates_[i][asInt(JointsTypes::REVOL)] = joint_->revolute[i];
+	jointStates_[i][asInt(JointsTypes::STEER)] = normalizeAngle(joint_->steering[i]);
     }
     ///@todo compute body state now estimate from those ones lol
 }
