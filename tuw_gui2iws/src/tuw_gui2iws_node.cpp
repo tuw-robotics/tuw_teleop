@@ -47,13 +47,14 @@ int main ( int argc, char **argv ) {
     ros::init ( argc, argv, "blue_control" );  /// initializes the ros node with default name
     ros::NodeHandle n;
 
-    double figurePixSize = 1024;
-    double figureRadius  = 2;
+    double figurePixSize = 640;
+    double figureRadius  = 2.0;
     double figureGrid  = 0.0;
 
     Gui2IwsNode gui2IwsNode ( n );
     gui2IwsNode.init();
     gui2IwsNode.initFigure(figurePixSize, figureRadius, figureGrid);
+    ROS_INFO("Initialization done!");
 
     ros::Rate rate ( 30. );
     while ( ros::ok() ) {
@@ -83,9 +84,33 @@ Gui2IwsNode::Gui2IwsNode ( ros::NodeHandle & n )
     sub_joint_states_ = n.subscribe(    "joint_measures", 1, &Gui2IwsNode::callbackJointStates, this );
     sub_odometry_     = n.subscribe(              "odom", 1, &Gui2IwsNode::callbackOdometry   , this );
 
-    n_param_.getParam( "steering_links", steeringLinkNames_);
+    std::vector<std::string> steeringMountsLinkNames_; 
+    n_param_.getParam( "steering_mount_links", steeringMountsLinkNames_);
+    n_param_.getParam( "wheel_radius", wheelRadius_);
+    wheelRadius_ = 0.05; 
+    wheelWidth_  = 0.025;///@todo hardcoded
     
     tf_listener_ = std::make_shared<tf::TransformListener>();
+    
+    
+    legInfo     .resize(steeringMountsLinkNames_.size());
+    for(size_t i = 0; i < steeringMountsLinkNames_.size(); ++i) {
+	tf::StampedTransform tf_baseLink2Wheel;
+	bool found = false; 
+	while(!found) {
+	    found = true;
+	    try {
+		tf_listener_->lookupTransform ( tf::resolve ( n_.getNamespace(), "base_link" ), tf::resolve ( n_.getNamespace(), steeringMountsLinkNames_[i] ), ros::Time ( 0 ), tf_baseLink2Wheel );
+	    } catch ( tf::TransformException ex ) {
+		found = false;
+		ROS_ERROR ( "%s",ex.what() );
+		ros::Duration ( 0.1 ).sleep();
+	    }
+	}
+	legInfo[i] = cv::Point2d ( - tf_baseLink2Wheel.getOrigin().y(),  tf_baseLink2Wheel.getOrigin().x() );
+	std::cout<<steeringMountsLinkNames_[i]<<endl;
+	std::cout<<legInfo[i].x<<", "<<legInfo[i].y<<endl;
+    }
     
     reconfigureFnc_ = boost::bind ( &Gui2IwsNode::callbackConfigBlueControl, this,  _1, _2 );
     reconfigureServer_.setCallback ( reconfigureFnc_ );
@@ -99,19 +124,8 @@ void Gui2IwsNode::callbackConfigBlueControl ( tuw_teleop::Gui2IwsConfig &config,
 
 void Gui2IwsNode::callbackJointStates( const tuw_iws_msgs::JointsIWS::ConstPtr &joint_ ){
     size_t jointStatesSize = joint_->steering.size();
-    jointStates_.resize(jointStatesSize);
-    legInfo     .resize(jointStatesSize);
+    jointStates_.resize(jointStatesSize);    
     for ( std::size_t i = 0; i < jointStates_.size(); i++ ) {
-	
-	tf::StampedTransform transform;
-	try {
-	    tf_listener_->lookupTransform ( tf::resolve ( n_.getNamespace(), "base_link" ),  tf::resolve ( n_.getNamespace(), steeringLinkNames_[i] ), ros::Time ( 0 ), transform );
-	} catch ( tf::TransformException ex ) {
-	    ROS_ERROR ( "%s",ex.what() );
-	    continue;
-	}
-	legInfo[i] = cv::Point2d ( - transform.getOrigin().y(),  transform.getOrigin().x() );
-	
 	jointStates_[i][asInt(JointsTypes::REVOL)] = joint_->revolute[i];
 	jointStates_[i][asInt(JointsTypes::STEER)] = normalizeAngle(joint_->steering[i]);
     }

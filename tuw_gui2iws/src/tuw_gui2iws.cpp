@@ -49,8 +49,7 @@ Gui2Iws::Gui2Iws ( const std::string &ns )
 
     ROS_INFO("OpenCV: %s", CV_VERSION);
     
-    wheelRadius_ = 0.05; 
-    wheelWidth_  = 0.025;///@todo hardcoded
+    
 }
 
 void Gui2Iws::init() {
@@ -143,7 +142,7 @@ void Gui2Iws::initFigure(std::size_t pix_size, int radius_size, double grid_size
 			Figure::black, 3,  CV_AA );
 }
 void Gui2Iws::initFigureRobotBase(){
-    for(size_t i = 0; i < legInfo.size(); i++){ 
+    for(size_t i = 0; i < jointStates_.size(); i++){ 
 	figure_local_.line( figure_local_.background(), Point2D(legInfo[                   i].x, legInfo[                   i].y), 
 			                                Point2D(legInfo[(i+1)%legInfo.size()].x, legInfo[(i+1)%legInfo.size()].y), Figure::gray, 3,  CV_AA );
     }
@@ -174,7 +173,7 @@ void Gui2Iws::fillLocalPlot(){
     double angTarget = bodyStateTarget_[asInt(BodyVRP::PHI)];
     figure_local_.circle( Point2D( 1./rhoTarget * cos(angTarget), 1./rhoTarget * sin(angTarget) ), 2, Figure::red, 1,  CV_AA );
     
-    for(size_t i = 0; i < legInfo.size(); ++i){ 
+    for(size_t i = 0; i < jointStates_.size(); ++i){ 
 	
 	const double& lx = legInfo[i].x; const double& ly = legInfo[i].y;
 	double csteer   = cos(jointStates_[i][asInt(JointsTypes::STEER)]), csteer90 = cos(jointStates_[i][asInt(JointsTypes::STEER)] + M_PI/2.);

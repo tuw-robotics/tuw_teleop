@@ -75,8 +75,6 @@ private:
     
     std::shared_ptr<tf::TransformListener> tf_listener_;
     
-    std::vector<std::string> steeringLinkNames_;
-    
     double xBody, yBody, aBody;
 };
 
