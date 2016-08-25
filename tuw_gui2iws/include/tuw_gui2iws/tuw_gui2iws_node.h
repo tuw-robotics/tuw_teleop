@@ -43,8 +43,8 @@
 #include <sensor_msgs/JointState.h>
 #include <dynamic_reconfigure/server.h>
 
-#include <tuw_iws_msgs/IwsCmd_VRAT_Vec.h>
-#include <tuw_iws_msgs/JointsIWS.h>
+#include <tuw_nav_msgs//IwsCmd_VRAT_Vec.h>
+#include <tuw_nav_msgs/JointsIWS.h>
 #include <tuw_gui2iws/tuw_gui2iws.h>
 
 namespace tuw {
@@ -67,7 +67,7 @@ private:
     ros::Subscriber sub_odometry_;
     ros::Subscriber sub_cmds_;
     //void callbackLaser ( const sensor_msgs::LaserScan& );   /// callback function to execute on incoming sensor data
-    void callbackJointStates( const tuw_iws_msgs::JointsIWS::ConstPtr &      );
+    void callbackJointStates( const tuw_nav_msgs::JointsIWS::ConstPtr &      );
     void callbackOdometry   ( const nav_msgs   ::Odometry  ::ConstPtr & odom_);
     void callbackConfigBlueControl ( tuw_teleop::Gui2IwsConfig &config, uint32_t level ); /// callback function on incoming parameter changes
     dynamic_reconfigure::Server<tuw_teleop::Gui2IwsConfig> reconfigureServer_; /// parameter server stuff

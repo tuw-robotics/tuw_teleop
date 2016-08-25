@@ -80,7 +80,7 @@ Gui2IwsNode::Gui2IwsNode ( ros::NodeHandle & n )
     n_ ( n ),
     n_param_ ( "~" ){
 
-    pub_jnts_cmd_     = n.advertise<tuw_iws_msgs::IwsCmd_VRAT_Vec>("base_cmds"  , 1);
+    pub_jnts_cmd_     = n.advertise<tuw_nav_msgs::IwsCmd_VRAT_Vec>("base_cmds"  , 1);
     sub_joint_states_ = n.subscribe(    "joint_measures", 1, &Gui2IwsNode::callbackJointStates, this );
     sub_odometry_     = n.subscribe(              "odom", 1, &Gui2IwsNode::callbackOdometry   , this );
 
@@ -122,7 +122,7 @@ void Gui2IwsNode::callbackConfigBlueControl ( tuw_teleop::Gui2IwsConfig &config,
     init();
 }
 
-void Gui2IwsNode::callbackJointStates( const tuw_iws_msgs::JointsIWS::ConstPtr &joint_ ){
+void Gui2IwsNode::callbackJointStates( const tuw_nav_msgs::JointsIWS::ConstPtr &joint_ ){
     size_t jointStatesSize = joint_->steering.size();
     jointStates_.resize(jointStatesSize);    
     for ( std::size_t i = 0; i < jointStates_.size(); i++ ) {
@@ -167,7 +167,7 @@ void Gui2IwsNode::publishJntsCmds () {
     if(!new_trajectory){ return; }
     new_trajectory = false;
 
-    tuw_iws_msgs::IwsCmd_VRAT_Vec jnts_cmd;
+    tuw_nav_msgs::IwsCmd_VRAT_Vec jnts_cmd;
     jnts_cmd.header.stamp = ros::Time::now();
     jnts_cmd.deltaT.resize(2);
     jnts_cmd.v     .resize(2); 
