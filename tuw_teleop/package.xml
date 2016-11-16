@@ -41,10 +41,12 @@
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
 
+  <run_depend>tuw_joy2twist</run_depend>
+  <run_depend>tuw_keyboard2twist</run_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- Other tools can request additional information be placed here -->
-
+    <metapackage />
   </export>
 </package>
