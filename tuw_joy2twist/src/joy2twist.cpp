@@ -3,7 +3,7 @@
  * @author Markus Bader <markus.bader@tuwien.ac.at>
  * @date June 2015
  * @brief Generates twist messages based on joy messages
- * The code is based on the teleop_base.cpp, 2008, Willow Garage and 
+ * The code is based on the teleop_base.cpp, 2008, Willow Garage and
  * 2010  David Feil-Seifer [dfseifer@usc.edu], Edward T. Kaszubski [kaszubsk@usc.edu]
  */
 
@@ -12,7 +12,8 @@
 #include <unistd.h>
 #include <math.h>
 #include "sensor_msgs/Joy.h"
-#include "geometry_msgs/Twist.h"
+#include <geometry_msgs/Twist.h>
+#include <tuw_nav_msgs/JointsIWS.h>
 
 /**
  * @brief Class to generate twist messages base on TeleopBase written by Willow Garage
@@ -24,6 +25,7 @@ public:
     ros::NodeHandle n_;
     ros::NodeHandle n_param_;
     geometry_msgs::Twist cmd_, cmd_passthrough_;
+    tuw_nav_msgs::JointsIWS cmd_iws_;
     bool debug;
     double scale;
     double req_vx, req_vy, req_vw, req_scale;
@@ -33,6 +35,11 @@ public:
     int deadman_button, scale_button;
     bool deadman_no_publish_;
     bool deadman_;
+    enum publisher_type_t {
+        TWIST_COMMANDS = 0,            // Geometry Msgs / Twist
+        ACKERMANN_COMMANDS = 1,        // tuw_nav_msgs / JointsIWS [0]/[0]
+    };
+    publisher_type_t publisher_type;
 
     ros::Time last_recieved_joy_message_time_;
     ros::Duration joy_msg_timeout_;
@@ -42,13 +49,16 @@ public:
     ros::Subscriber sub_cmd_passthrough_;
 
     Joy2Twist ( ros::NodeHandle & n, bool deadman_no_publish = false ) :
-        n_ ( n ), n_param_ ( "~" ), 
+        n_ ( n ), n_param_ ( "~" ),
         req_vx(0), req_vy(0), req_vw(0), req_scale(1.0),
         deadman_no_publish_ (deadman_no_publish ) {
     }
 
     void init() {
         cmd_.linear.x = cmd_.linear.y = cmd_.angular.z = 0.0;
+        cmd_passthrough_ = cmd_;
+
+        n_param_.param ( "publisher_type", (int&) publisher_type, 0 );
 
         n_param_.param ( "debug", debug, false );
 
@@ -98,7 +108,19 @@ public:
         ROS_INFO ( "max_vw: %.3f rad/s", max_vw );
 
 
-        pub_cmd_ = n_.advertise < geometry_msgs::Twist > ( "cmd_vel", 1 );
+        switch ( publisher_type ) {
+            case TWIST_COMMANDS:
+                pub_cmd_ = n_.advertise < geometry_msgs::Twist > ( "cmd_vel", 1 );
+                break;
+            case ACKERMANN_COMMANDS:
+                pub_cmd_ = n_.advertise < tuw_nav_msgs::JointsIWS > ( "cmd_vel", 1 );
+                cmd_iws_.revolute.resize(1);
+                cmd_iws_.steering.resize(1);
+                break;
+            default:
+                ROS_ERROR("No such publisher type");
+        }
+
         sub_cmd_passthrough_ = n_.subscribe ( "cmd_passthrough", 10, &Joy2Twist::callback_cmd_passthrough, this );
         sub_joy_ = n_.subscribe ( "joy", 10, &Joy2Twist::joy_cb, this );
     }
@@ -231,19 +253,26 @@ public:
     }
 
     void send_cmd_vel() {
-        if ( deadman_ && (last_recieved_joy_message_time_ + joy_msg_timeout_  > ros::Time::now()) ) {
-            cmd_.linear.x = req_vx;
-            cmd_.linear.y = req_vy;
-            cmd_.angular.z = req_vw;
-            pub_cmd_.publish ( cmd_ );
-        } else {
-            //cmd_.linear.x = cmd_.linear.y = cmd_.angular.z = 0;
-            cmd_ = cmd_passthrough_;
-            //if (!deadman_no_publish_)
-            {
-                pub_cmd_.publish ( cmd_ ); //Only publish if deadman_no_publish is enabled
-            }
+        if ( !deadman_ || (last_recieved_joy_message_time_ + joy_msg_timeout_  < ros::Time::now()) ) {
+            req_vx = cmd_passthrough_.linear.x;
+            req_vy = cmd_passthrough_.linear.y;
+            req_vw = cmd_passthrough_.angular.z;
         }
+
+        switch ( publisher_type ) {
+            case TWIST_COMMANDS:
+                cmd_.linear.x = req_vx;
+                cmd_.linear.y = req_vy;
+                cmd_.angular.z = req_vw;
+                pub_cmd_.publish ( cmd_ );
+                break;
+            case ACKERMANN_COMMANDS:
+                cmd_iws_.revolute[0] = req_vx;
+                cmd_iws_.steering[0] = req_vw;
+                pub_cmd_.publish ( cmd_iws_ );
+                break;
+        }
+
     }
 };
 

@@ -7,6 +7,9 @@ project(tuw_joy2twist)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
+  geometry_msgs
+  tuw_geometry
+  tuw_nav_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -91,7 +94,7 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(include
+include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
