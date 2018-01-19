@@ -3,7 +3,7 @@
   <name>tuw_gamepad</name>
   <version>0.0.0</version>
   <description>The tuw_gamepad package offers several command publisher using a Logitech Gamepad F710.
-  The publishers includes a geometry_msgs/Twist publisher as well as a tuw_nav_msgs/JointIWS publisher
+  The publishers includes a geometry_msgs/Twist publisher as well as a tuw_nav_msgs/JointIWS publisher.
   </description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
