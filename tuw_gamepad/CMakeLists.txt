@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(tuw_joy2twist)
+project(tuw_gamepad)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -101,14 +101,14 @@ include_directories(include
 # )
 
 ## Declare a cpp executable
-add_executable(joy2twist src/joy2twist.cpp)
+add_executable(gamepad2twist src/gamepad2twist.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(v4r_p2os_node v4r_p2os_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(joy2twist
+target_link_libraries(gamepad2twist
    ${catkin_LIBRARIES}
 )
 
