@@ -1,33 +1,26 @@
 <launch>
   <!-- Parameters for a Logitech F710 Gamepad, "MODE" = off and "XID/HID Switch" = X -->
-
+  
   <arg name="robot_name" default="" />
   <arg name="max_vx" default="2" />
   <arg name="max_vy" default="0" />
   <arg name="max_vw" default="2" />
   <arg name="scale"  default="2" />
+  <arg name="gamepad_config" default="logitech_f510_twist.yml" />
+  <arg name="publisher_type" default="0" />
 
   <!-- run the teleop node to send velocities -->
   <node pkg="tuw_gamepad" type="gamepad2twist" name="teleop"  output="screen" >
 
     <param name="debug" value="false" />
-    <param name="deadman_button" value="5" />
-    <param name="scale_button" value="4" />
-    
-    <!-- -1 means off -->
-    <param name="axis_vx" value="1" />
-    <param name="axis_vy" value="-1" />
-    <param name="axis_vw" value="0" />
-
-    <param name="axis_vx_discrete" value="7" />
-    <param name="axis_vy_discrete" value="-1" />
-    <param name="axis_vw_discrete" value="6" />
 
     <param name="max_vx" value="$(arg max_vx)" />
     <param name="max_vy" value="$(arg max_vy)" />
     <param name="max_vw" value="$(arg max_vw)" />
     <param name="scale" value="$(arg scale)" />
+    <param name="publisher_type" value="$(arg publisher_type)" />
 
+    <rosparam file="$(find tuw_gamepad)/cfg/$(arg gamepad_config)" />
 
     <remap from="des_vel" to="$(arg robot_name)/base_controller/command" />
     <remap from="cmd_vel" to="$(arg robot_name)/cmd_vel" />
