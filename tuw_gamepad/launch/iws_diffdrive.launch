@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+
+<launch>
+  <!-- Parameters for a Logitech F710 Gamepad, "MODE" = off and "XID/HID Switch" = X -->
+  
+  <arg name="robot_name" default="" />
+  <arg name="max_vx" default="1" />
+  <arg name="max_vy" default="0" />
+  <arg name="max_vw" default="1" />
+  <arg name="scale"  default="2" />
+  <arg name="gamepad" default="logitech_f510" />
+  <arg name="command_type" default="iws_diffdrive" />
+
+  <!-- run the teleop node to send velocities -->
+  <node pkg="tuw_gamepad" type="gamepad" name="teleop"  output="screen" >
+
+    <param name="debug" value="false" />
+
+    <param name="max_vx" value="$(arg max_vx)" />
+    <param name="max_vy" value="$(arg max_vy)" />
+    <param name="max_vw" value="$(arg max_vw)" />
+    <param name="scale" value="$(arg scale)" />
+    <param name="command_type" value="$(arg command_type)" />
+
+    <rosparam file="$(find tuw_gamepad)/cfg/$(arg gamepad)/$(arg command_type).yml" />
+
+    <remap from="des_vel" to="$(arg robot_name)/base_controller/command" />
+    <remap from="cmd_vel" to="$(arg robot_name)/cmd_vel" />
+  </node>
+
+  <!-- run a joy node -->
+  <node pkg="joy" type="joy_node" name="joy_controller" />
+</launch>

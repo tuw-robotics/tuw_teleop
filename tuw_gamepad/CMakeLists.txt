@@ -1,20 +1,28 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(tuw_gamepad)
 
+add_compile_options(-std=c++14) ## for c++ 2014
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  rospy
   std_msgs
   geometry_msgs
   tuw_geometry
   tuw_nav_msgs
+  dynamic_reconfigure
 )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
+
+generate_dynamic_reconfigure_options( 
+  cfg/GamepadControl.cfg 
+)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -83,7 +91,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES v4r_p2os
+#  LIBRARIES tuw_gamepad
 #  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
 )
@@ -96,22 +104,23 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  include/
 )
 
 ## Declare a cpp library
-# add_library(v4r_p2os
-#   src/${PROJECT_NAME}/v4r_p2os.cpp
+# add_library(tuw_gamepad
+#   src/${PROJECT_NAME}/tuw_gamepad.cpp
 # )
 
 ## Declare a cpp executable
-add_executable(gamepad2twist src/gamepad2twist.cpp)
+add_executable(gamepad src/gamepad.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(v4r_p2os_node v4r_p2os_generate_messages_cpp)
+add_dependencies(gamepad  ${PROJECT_NAME}_gencfg)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(gamepad2twist
+target_link_libraries(gamepad
    ${catkin_LIBRARIES}
 )
 
@@ -130,7 +139,7 @@ target_link_libraries(gamepad2twist
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS v4r_p2os v4r_p2os_node
+# install(TARGETS tuw_gamepad tuw_gamepad_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -155,7 +164,7 @@ target_link_libraries(gamepad2twist
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_v4r_p2os.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_tuw_gamepad.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

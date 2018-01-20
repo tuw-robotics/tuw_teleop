@@ -1,0 +1,6 @@
+# Logitech Rumble Gamepad F510 (wired)
+# switch to Mode 'X' and mode off (no led)
+deadman_button: 4
+scale_button: 5
+axis_vx: 1
+axis_vw: 3
