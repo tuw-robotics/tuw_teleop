@@ -20,7 +20,6 @@
 #include <sensor_msgs/Joy.h>
 #include <geometry_msgs/Twist.h>
 #include <tuw_nav_msgs/JointsIWS.h>
-#include <boost/algorithm/string.hpp>
 
 #include <dynamic_reconfigure/server.h>
 #include <tuw_gamepad/GamepadControlConfig.h>
@@ -52,7 +51,7 @@ public:
   geometry_msgs::Twist cmd_twist_, cmd_twist_passthrough_;
   tuw_nav_msgs::JointsIWS cmd_iws_, cmd_iws_passthrough_;
   
-  double req_vx, req_vy, req_vw, req_scale;
+  double req_vx_, req_vy_, req_vw_, req_scale_;
   
   std::string command_type;
   bool deadman_no_publish_;

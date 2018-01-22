@@ -29,5 +29,8 @@
   </node>
 
   <!-- run a joy node -->
-  <node pkg="joy" type="joy_node" name="joy_controller" />
-</launch>
+  <node pkg="joy" type="joy_node" name="joy_controller" >
+    <param name="autorepeat_rate" value="5" />  
+  </node>
+  
+  </launch>
