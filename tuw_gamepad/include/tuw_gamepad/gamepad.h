@@ -32,7 +32,7 @@
 class GamepadNode {
 public:
   
-  GamepadNode(ros::NodeHandle & n, bool deadman_no_publish = false);
+  GamepadNode(ros::NodeHandle & n);
   ~GamepadNode();
   
   // ROS Handle
@@ -54,8 +54,7 @@ public:
   double req_vx_, req_vy_, req_vw_, req_scale_;
   
   std::string command_type;
-  bool deadman_no_publish_;
-  bool deadman_;
+  bool deadman_, passthrough_;
   enum PublisherType {
     TWIST_DIFFDRIVE_COMMANDS = 0,                // Geometry Msgs / Twist
     IWS_ACKERMANN_COMMANDS = 1,        // tuw_nav_msgs / JointsIWS [0]/[0]
@@ -73,7 +72,7 @@ public:
 
   
   
-  void callback_iws_passthrough (const tuw_nav_msgs::JointsIWS& msg);
+  void callback_iws_passthrough (const tuw_nav_msgs::JointsIWSPtr& msg);
 
   void callback_twist_passthrough (const geometry_msgs::TwistConstPtr& msg);
 

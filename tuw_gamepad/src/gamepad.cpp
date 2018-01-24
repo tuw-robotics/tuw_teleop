@@ -13,25 +13,16 @@
 int main (int argc, char **argv) {
   ros::init (argc, argv, "teleop");
   ros::NodeHandle nh;
-  const char* opt_no_publish = "--deadman_no_publish";
-
-  bool no_publish = false;
-  for (int i = 1; i < argc; i++) {
-    if (!strncmp (argv[i], opt_no_publish, strlen (opt_no_publish)))
-      no_publish = true;
-  }
-
-  GamepadNode teleop (nh, no_publish);
+  GamepadNode teleop (nh);
 
   exit (0);
   return 0;
 }
 
 
-GamepadNode::GamepadNode (ros::NodeHandle & n, bool deadman_no_publish) 
-: n_ (n), n_param_ ("~"),
-  req_vx_ (0), req_vy_ (0), req_vw_ (0), req_scale_ (1.0),
-  deadman_no_publish_ (deadman_no_publish) {
+GamepadNode::GamepadNode (ros::NodeHandle & n)
+  : n_ (n), n_param_ ("~"),
+    req_vx_ (0), req_vy_ (0), req_vw_ (0), req_scale_ (1.0) {
 
   //reconfigure stuff
   reconfigureFnc_    = boost::bind (&GamepadNode::callbackConfig, this,  _1, _2);
@@ -64,7 +55,7 @@ GamepadNode::GamepadNode (ros::NodeHandle & n, bool deadman_no_publish)
     cmd_iws_.revolute.resize (1);
     cmd_iws_.steering.resize (1);
     cmd_iws_passthrough_ = cmd_iws_;
-    sub_cmd_passthrough_ = n_.subscribe ("cmd_vel_passthrough", 10, &GamepadNode::callback_twist_passthrough, this);
+    sub_cmd_passthrough_ = n_.subscribe ("cmd_vel_passthrough", 10, &GamepadNode::callback_iws_passthrough, this);
     break;
   case IWS_DIFFDRIVE_COMMANDS:
     ROS_INFO ("publisher_type_:  IWS_DIFFDRIVE_COMMANDS");
@@ -86,7 +77,7 @@ GamepadNode::GamepadNode (ros::NodeHandle & n, bool deadman_no_publish)
   }
 
   sub_joy_ = n_.subscribe ("joy", 10, &GamepadNode::joy_cb, this);
-  
+
 
 
   while (ros::ok()) {
@@ -99,9 +90,10 @@ GamepadNode::GamepadNode (ros::NodeHandle & n, bool deadman_no_publish)
 GamepadNode::~GamepadNode() {
 }
 
-void GamepadNode::callback_iws_passthrough (const tuw_nav_msgs::JointsIWS& msg) {
-  ///@ToDo ROS_DEBUG ("callback_iws_passthrough: [%s,%s]", msg->type_steering.c_str(), msg->type_revolute.c_str());
+void GamepadNode::callback_iws_passthrough (const tuw_nav_msgs::JointsIWSPtr& msg) {
+  ROS_DEBUG ("callback_iws_passthrough: [%s,%s]", msg->type_steering.c_str(), msg->type_revolute.c_str());
   ///@ToDo cmd_iws_passthrough_ = *msg;
+  cmd_iws_passthrough_ = *msg;
 }
 
 void GamepadNode::callback_twist_passthrough (const geometry_msgs::TwistConstPtr& msg) {
@@ -112,11 +104,15 @@ void GamepadNode::callback_twist_passthrough (const geometry_msgs::TwistConstPtr
 bool GamepadNode::buttonsOK (const sensor_msgs::Joy::ConstPtr& joy_msg) {
 
   if ( (config_.scale_button >= 0) && (joy_msg->buttons.size() <= (unsigned int) config_.scale_button))  {
-    ROS_ERROR ("Button scale_button %i does not exit!", config_.axis_vx);
+    ROS_ERROR ("Button scale_button %i does not exit!", config_.scale_button);
     return false;
   }
   if ( (config_.deadman_button >= 0) && (joy_msg->buttons.size() <= (unsigned int) config_.deadman_button))  {
-    ROS_ERROR ("Button deadman_button %i does not exit!", config_.axis_vx);
+    ROS_ERROR ("Button deadman_button %i does not exit!", config_.deadman_button);
+    return false;
+  }
+  if ( (config_.passthrough_button >= 0) && (joy_msg->buttons.size() <= (unsigned int) config_.passthrough_button))  {
+    ROS_ERROR ("Button passthrough_button %i does not exit!", config_.passthrough_button);
     return false;
   }
   if ( (config_.axis_vx >= 0) && (joy_msg->axes.size() <= (unsigned int) config_.axis_vx))  {
@@ -149,118 +145,132 @@ bool GamepadNode::buttonsOK (const sensor_msgs::Joy::ConstPtr& joy_msg) {
 void GamepadNode::joy_cb (const sensor_msgs::Joy::ConstPtr& joy_msg) {
 
   deadman_ = joy_msg->buttons[config_.deadman_button];
+  passthrough_ = joy_msg->buttons[config_.passthrough_button];
 
-  if (!deadman_) return;
+  if (deadman_) {
 
-  if ( (config_.scale_button >= 0) && joy_msg->buttons[config_.scale_button])
-    req_scale_ = config_.scale;
-  else
-    req_scale_ = 1.0;
+    if ( (config_.scale_button >= 0) && joy_msg->buttons[config_.scale_button])
+      req_scale_ = config_.scale;
+    else
+      req_scale_ = 1.0;
 
-  if (config_.debug) {
-    ROS_INFO ("------- ");
-    ROS_INFO ("max_vx:    %.3f", config_.max_vx);
-    ROS_INFO ("max_vy:    %.3f", config_.max_vy);
-    ROS_INFO ("max_vw:    %.3f", config_.max_vw);
-    ROS_INFO ("req_scale: %.3f", req_scale_);
-    std::stringstream ss_axis;
-    for (unsigned int i = 0; i < joy_msg->axes.size(); i++) {
-      ss_axis << (i==0?" ":", ") << "[" << i << "] = ";
-      ss_axis << std::fixed << std::setw (9) << std::setprecision (6) << joy_msg->axes[i];
+    if (config_.debug) {
+      ROS_INFO ("------- ");
+      ROS_INFO ("max_vx:    %.3f", config_.max_vx);
+      ROS_INFO ("max_vy:    %.3f", config_.max_vy);
+      ROS_INFO ("max_vw:    %.3f", config_.max_vw);
+      ROS_INFO ("req_scale: %.3f", req_scale_);
+      std::stringstream ss_axis;
+      for (unsigned int i = 0; i < joy_msg->axes.size(); i++) {
+        ss_axis << (i==0?" ":", ") << "[" << i << "] = ";
+        ss_axis << std::fixed << std::setw (9) << std::setprecision (6) << joy_msg->axes[i];
+      }
+      ROS_INFO ("axis    %s", ss_axis.str().c_str());
+      std::stringstream ss_button;
+      for (unsigned int i = 0; i < joy_msg->buttons.size(); i++) {
+        ss_button << (i==0?" ":", ") << "[" << i << "] = ";
+        ss_button << std::fixed << std::setw (4) << joy_msg->buttons[i];
+      }
+      ROS_INFO ("buttons %s", ss_button.str().c_str());
     }
-    ROS_INFO ("axis    %s", ss_axis.str().c_str());
-    std::stringstream ss_button;
-    for (unsigned int i = 0; i < joy_msg->buttons.size(); i++) {
-      ss_button << (i==0?" ":", ") << "[" << i << "] = ";
-      ss_button << std::fixed << std::setw (4) << joy_msg->buttons[i];
+
+    //Record this message receipt
+    last_recieved_joy_message_time_ = ros::Time::now();
+
+    // Base
+
+    req_vx_ = req_vy_ = req_vw_ = 0.0;
+
+    if (!buttonsOK (joy_msg)) return;
+
+    if (config_.axis_vx >= 0) req_vx_ = joy_msg->axes[config_.axis_vx] * config_.max_vx * req_scale_;
+    if (config_.axis_vy >= 0) req_vy_ = joy_msg->axes[config_.axis_vy] * config_.max_vy * req_scale_;
+    if (config_.axis_vw >= 0) req_vw_ = joy_msg->axes[config_.axis_vw] * config_.max_vw * req_scale_;
+
+    if (config_.debug) {
+      ROS_INFO (">>> Analog ");
+      ROS_INFO ("axis_vx: %3i", config_.axis_vx);
+      ROS_INFO ("axis_vy: %3i", config_.axis_vy);
+      ROS_INFO ("axis_vw: %3i", config_.axis_vw);
+      ROS_INFO ("joy_msg->axes[axis_vx]: %.3f", joy_msg->axes[config_.axis_vx]);
+      ROS_INFO ("joy_msg->axes[axis_vy]: %.3f", joy_msg->axes[config_.axis_vy]);
+      ROS_INFO ("joy_msg->axes[axis_vw]: %.3f", joy_msg->axes[config_.axis_vw]);
+      ROS_INFO ("req_vx: %.3f", req_vx_);
+      ROS_INFO ("req_vy: %.3f", req_vy_);
+      ROS_INFO ("req_vw: %.3f", req_vw_);
     }
-    ROS_INFO ("buttons %s", ss_button.str().c_str());
-  }
 
-  //Record this message receipt
-  last_recieved_joy_message_time_ = ros::Time::now();
+    if (fabs (joy_msg->axes[config_.axis_vx_discrete]) > 0.9) {
+      if (config_.axis_vx_discrete >= 0) req_vx_ = joy_msg->axes[config_.axis_vx_discrete] * config_.max_vx * req_scale_;
+    }
+    if (fabs (joy_msg->axes[config_.axis_vy_discrete]) > 0.9) {
+      if (config_.axis_vy_discrete >= 0) req_vy_ = joy_msg->axes[config_.axis_vy_discrete] * config_.max_vy * req_scale_;
+    }
+    if (fabs (joy_msg->axes[config_.axis_vw_discrete]) > 0.9) {
+      if (config_.axis_vw_discrete >= 0) req_vw_ = joy_msg->axes[config_.axis_vw_discrete] * config_.max_vw * req_scale_;
+    }
 
-  // Base
-
-  req_vx_ = req_vy_ = req_vw_ = 0.0;
-
-  if (!buttonsOK (joy_msg)) return;
-
-  if (config_.axis_vx >= 0) req_vx_ = joy_msg->axes[config_.axis_vx] * config_.max_vx * req_scale_;
-  if (config_.axis_vy >= 0) req_vy_ = joy_msg->axes[config_.axis_vy] * config_.max_vy * req_scale_;
-  if (config_.axis_vw >= 0) req_vw_ = joy_msg->axes[config_.axis_vw] * config_.max_vw * req_scale_;
-
-  if (config_.debug) {
-    ROS_INFO (">>> Analog ");
-    ROS_INFO ("axis_vx: %3i", config_.axis_vx);
-    ROS_INFO ("axis_vy: %3i", config_.axis_vy);
-    ROS_INFO ("axis_vw: %3i", config_.axis_vw);
-    ROS_INFO ("joy_msg->axes[axis_vx]: %.3f", joy_msg->axes[config_.axis_vx]);
-    ROS_INFO ("joy_msg->axes[axis_vy]: %.3f", joy_msg->axes[config_.axis_vy]);
-    ROS_INFO ("joy_msg->axes[axis_vw]: %.3f", joy_msg->axes[config_.axis_vw]);
-    ROS_INFO ("req_vx: %.3f", req_vx_);
-    ROS_INFO ("req_vy: %.3f", req_vy_);
-    ROS_INFO ("req_vw: %.3f", req_vw_);
-  }
-
-  if (fabs (joy_msg->axes[config_.axis_vx_discrete]) > 0.9) {
-    if (config_.axis_vx_discrete >= 0) req_vx_ = joy_msg->axes[config_.axis_vx_discrete] * config_.max_vx * req_scale_;
-  }
-  if (fabs (joy_msg->axes[config_.axis_vy_discrete]) > 0.9) {
-    if (config_.axis_vy_discrete >= 0) req_vy_ = joy_msg->axes[config_.axis_vy_discrete] * config_.max_vy * req_scale_;
-  }
-  if (fabs (joy_msg->axes[config_.axis_vw_discrete]) > 0.9) {
-    if (config_.axis_vw_discrete >= 0) req_vw_ = joy_msg->axes[config_.axis_vw_discrete] * config_.max_vw * req_scale_;
-  }
-
-  if (config_.debug) {
-    ROS_INFO (">>> Discrete");
-    ROS_INFO ("axis_vx_discrete: %3i", config_.axis_vx_discrete);
-    ROS_INFO ("axis_vy_discrete: %3i", config_.axis_vy_discrete);
-    ROS_INFO ("axis_vw_discrete: %3i", config_.axis_vw_discrete);
-    ROS_INFO ("joy_msg->axes[axis_vx_discrete]: %.3f", joy_msg->axes[config_.axis_vx_discrete]);
-    ROS_INFO ("joy_msg->axes[axis_vy_discrete]: %.3f", joy_msg->axes[config_.axis_vy_discrete]);
-    ROS_INFO ("joy_msg->axes[axis_vw_discrete]: %.3f", joy_msg->axes[config_.axis_vw_discrete]);
-    ROS_INFO ("req_vx: %.3f", req_vx_);
-    ROS_INFO ("req_vy: %.3f", req_vy_);
-    ROS_INFO ("req_vw: %.3f", req_vw_);
+    if (config_.debug) {
+      ROS_INFO (">>> Discrete");
+      ROS_INFO ("axis_vx_discrete: %3i", config_.axis_vx_discrete);
+      ROS_INFO ("axis_vy_discrete: %3i", config_.axis_vy_discrete);
+      ROS_INFO ("axis_vw_discrete: %3i", config_.axis_vw_discrete);
+      ROS_INFO ("joy_msg->axes[axis_vx_discrete]: %.3f", joy_msg->axes[config_.axis_vx_discrete]);
+      ROS_INFO ("joy_msg->axes[axis_vy_discrete]: %.3f", joy_msg->axes[config_.axis_vy_discrete]);
+      ROS_INFO ("joy_msg->axes[axis_vw_discrete]: %.3f", joy_msg->axes[config_.axis_vw_discrete]);
+      ROS_INFO ("req_vx: %.3f", req_vx_);
+      ROS_INFO ("req_vy: %.3f", req_vy_);
+      ROS_INFO ("req_vw: %.3f", req_vw_);
+    }
   }
 }
 
 void GamepadNode::publish_commands() {
   if (!deadman_ || (last_recieved_joy_message_time_ + joy_msg_timeout_  < ros::Time::now())) {
-    req_vx_ = cmd_twist_passthrough_.linear.x;
-    req_vy_ = cmd_twist_passthrough_.linear.y;
-    req_vw_ = cmd_twist_passthrough_.angular.z;
+    req_vx_ = 0;
+    req_vy_ = 0;
+    req_vw_ = 0;
   }
 
   switch (publisher_type_) {
   case TWIST_DIFFDRIVE_COMMANDS:
-    cmd_twist_.linear.x = req_vx_;
-    cmd_twist_.linear.y = req_vy_;
-    cmd_twist_.angular.z = req_vw_;
-    pub_cmd_.publish (cmd_twist_);
+    if (passthrough_) {
+      pub_cmd_.publish (cmd_twist_passthrough_);
+    } else {
+      cmd_twist_.linear.x = req_vx_;
+      cmd_twist_.linear.y = req_vy_;
+      cmd_twist_.angular.z = req_vw_;
+      pub_cmd_.publish (cmd_twist_);
+    }
     break;
   case IWS_ACKERMANN_COMMANDS:
-    cmd_iws_.header.seq++;
-    cmd_iws_.header.stamp = ros::Time::now();
-    cmd_iws_.revolute[0] = req_vx_;
-    cmd_iws_.steering[0] = req_vw_;
-    pub_cmd_.publish (cmd_iws_);
+    if (passthrough_) {
+      pub_cmd_.publish (cmd_iws_passthrough_);
+    } else {
+      cmd_iws_.header.seq++;
+      cmd_iws_.header.stamp = ros::Time::now();
+      cmd_iws_.revolute[0] = req_vx_;
+      cmd_iws_.steering[0] = req_vw_;
+      pub_cmd_.publish (cmd_iws_);
+    }
     break;
   case IWS_DIFFDRIVE_COMMANDS:
-    cmd_iws_.header.seq++;
-    cmd_iws_.header.stamp = ros::Time::now();
-    double v = req_vx_, w = req_vw_;
-    double vl = v, vr = v;
-    if (fabs (w) > std::numeric_limits<double>::min()) {
-      double R = v*w, l = config_.wheel_displacement;
-      vl = w * (R-l/2.);
-      vr = w * (R+l/2.);
+    if (passthrough_) {
+      pub_cmd_.publish (cmd_iws_passthrough_);
+    } else {
+      cmd_iws_.header.seq++;
+      cmd_iws_.header.stamp = ros::Time::now();
+      double v = req_vx_, w = req_vw_;
+      double vl = v, vr = v;
+      if (fabs (w) > std::numeric_limits<double>::min()) {
+        double R = v*w, l = config_.wheel_displacement;
+        vl = w * (R-l/2.);
+        vr = w * (R+l/2.);
+      }
+      cmd_iws_.revolute[0] = vr/config_.wheel_radius;
+      cmd_iws_.revolute[1] = vl/config_.wheel_radius;
+      pub_cmd_.publish (cmd_iws_);
     }
-    cmd_iws_.revolute[0] = vr; //config_.wheel_radius;
-    cmd_iws_.revolute[1] = vl; //config_.wheel_radius;
-    pub_cmd_.publish (cmd_iws_);
     break;
   }
 
@@ -268,16 +278,16 @@ void GamepadNode::publish_commands() {
 
 void GamepadNode::callbackConfig (tuw_gamepad::GamepadControlConfig &_config, uint32_t _level) {
   config_ = _config;
-  
-  rate_ = std::make_shared<ros::Rate>(config_.rate);
-  
+
+  rate_ = std::make_shared<ros::Rate> (config_.rate);
+
   if (config_.joy_msg_timeout <= 0) {
     joy_msg_timeout_ = ros::Duration().fromSec (9999999);   //DURATION_MAX;
     ROS_DEBUG ("joy_msg_timeout <= 0 -> no timeout");
   } else {
     joy_msg_timeout_.fromSec (config_.joy_msg_timeout);
     ROS_DEBUG ("joy_msg_timeout: %.3f", joy_msg_timeout_.toSec());
-  }  
+  }
   ROS_DEBUG ("callbackGamepadControlConfig!");
 }
 
