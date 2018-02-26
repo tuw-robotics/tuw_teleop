@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+
+<launch>
+  <!-- Parameters for a Logitech F710 Gamepad, "MODE" = off and "XID/HID Switch" = X -->
+  
+  <arg name="robot_name" default="" />
+  <arg name="max_v" default="1" />
+  <arg name="max_w" default="1" />
+  <arg name="debug"  default="false" />
+  <arg name="gamepad" default="logitech_f510" />
+  <arg name="command_type" default="iws_diffdrive" />
+  <arg name="wheel_radius" default="0.075" />
+  <arg name="wheel_displacement" default="0.449" />
+
+  <!-- run the teleop node to send velocities -->
+  <group ns="$(arg robot_name)">
+    <node pkg="tuw_keyboard" type="tuw_keyboard_node" name="teleop_iws"  output="screen" >
+
+      <param name="max_v" value="$(arg max_v)" />
+      <param name="max_w" value="$(arg max_w)" />
+      <param name="command_type" value="$(arg command_type)" />
+      <param name="wheel_radius" value="$(arg wheel_radius)" />
+      <param name="wheel_displacement" value="$(arg wheel_displacement)" />
+
+    </node>
+  </group>
+  
+</launch>

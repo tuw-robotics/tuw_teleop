@@ -18,22 +18,18 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef KEYBOARD_2_TWIST_H
-#define KEYBOARD_2_TWIST_H
+#ifndef KEYBOARD_H
+#define KEYBOARD_H
 
 
-#include <tuw_keyboard2twist/tuw_keyboard2twist_defaults.h>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread.hpp>
 
+#define KEY_ESC   0027
+#define KEY_S     0330
+
 namespace tuw {
   
-enum Control_Mode{
-  MODE_NA = 0,
-  TELEOP = 1,
-  WANDERER = 2
-};
-
 class DriveCommand {
 public:
     DriveCommand() :v_ ( 0.0f ), w_ ( 0.0f ) {};
@@ -52,31 +48,29 @@ public:
     }
     void stop(){
         v_ = 0.0f, w_ = 0.0f;
-	}
+  }
 private:
     float v_, w_;
 };
 
-class Keyboard2Twist {
+class Keyboard {
 public:
 
-    Keyboard2Twist ();
-    ~Keyboard2Twist ();
-	void keyboardListener();
-	int control_mode() const {return control_mode_;}
-	bool quit() const {return quit_;}
-	void initTeleop();
+    Keyboard ();
+    ~Keyboard ();
+  void keyboardListener();
+  bool quit() const {return quit_;}
+  void initTeleop();
 protected:
-	bool quit_;
-	int control_mode_;
-	double velocity_forward_steps_;
-	double velocity_angular_steps_;
-	double velocity_forward_;
-	double velocity_angular_;
-	double velocity_forward_max_;
-	double velocity_angular_max_;
-	std::vector<float> laser_, laser_angle_;
-	
+  bool quit_;
+  double velocity_forward_steps_;
+  double velocity_angular_steps_;
+  double velocity_forward_;
+  double velocity_angular_;
+  double velocity_forward_max_;
+  double velocity_angular_max_;
+  std::vector<float> laser_, laser_angle_;
+  
     DriveCommand cmd_;
     boost::mutex mutex_;           /// mutex
     boost::thread t1;

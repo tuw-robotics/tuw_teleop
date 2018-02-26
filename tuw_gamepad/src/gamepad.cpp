@@ -45,18 +45,6 @@ GamepadNode::GamepadNode (ros::NodeHandle & n)
     cmd_twist_passthrough_ = cmd_twist_;
     sub_cmd_passthrough_ = n_.subscribe ("cmd_vel_passthrough", 10, &GamepadNode::callback_twist_passthrough, this);
     break;
-  case IWS_ACKERMANN_COMMANDS:
-    ROS_INFO ("publisher_type_:  IWS_ACKERMANN_COMMANDS");
-    pub_cmd_ = n_.advertise < tuw_nav_msgs::JointsIWS > ("cmd_vel", 1);
-    cmd_iws_.header.seq = 0;
-    cmd_iws_.header.stamp = ros::Time::now();
-    cmd_iws_.type_steering = "cmd_position";
-    cmd_iws_.type_revolute = "cmd_velocity";
-    cmd_iws_.revolute.resize (1);
-    cmd_iws_.steering.resize (1);
-    cmd_iws_passthrough_ = cmd_iws_;
-    sub_cmd_passthrough_ = n_.subscribe ("cmd_vel_passthrough", 10, &GamepadNode::callback_iws_passthrough, this);
-    break;
   case IWS_DIFFDRIVE_COMMANDS:
     ROS_INFO ("publisher_type_:  IWS_DIFFDRIVE_COMMANDS");
     pub_cmd_ = n_.advertise < tuw_nav_msgs::JointsIWS > ("joint_cmds", 1);
@@ -71,6 +59,18 @@ GamepadNode::GamepadNode (ros::NodeHandle & n)
     pub_cmd_.publish (cmd_iws_);
     cmd_iws_passthrough_ = cmd_iws_;
     sub_cmd_passthrough_ = n_.subscribe ("joint_cmds_passthrough", 10, &GamepadNode::callback_iws_passthrough, this);
+    break;
+  case IWS_ACKERMANN_COMMANDS:
+    ROS_INFO ("publisher_type_:  IWS_ACKERMANN_COMMANDS");
+    pub_cmd_ = n_.advertise < tuw_nav_msgs::JointsIWS > ("cmd_vel", 1);
+    cmd_iws_.header.seq = 0;
+    cmd_iws_.header.stamp = ros::Time::now();
+    cmd_iws_.type_steering = "cmd_position";
+    cmd_iws_.type_revolute = "cmd_velocity";
+    cmd_iws_.revolute.resize (1);
+    cmd_iws_.steering.resize (1);
+    cmd_iws_passthrough_ = cmd_iws_;
+    sub_cmd_passthrough_ = n_.subscribe ("cmd_vel_passthrough", 10, &GamepadNode::callback_iws_passthrough, this);
     break;
   default:
     ROS_ERROR ("No such publisher type");
@@ -243,17 +243,6 @@ void GamepadNode::publish_commands() {
       pub_cmd_.publish (cmd_twist_);
     }
     break;
-  case IWS_ACKERMANN_COMMANDS:
-    if (passthrough_) {
-      pub_cmd_.publish (cmd_iws_passthrough_);
-    } else {
-      cmd_iws_.header.seq++;
-      cmd_iws_.header.stamp = ros::Time::now();
-      cmd_iws_.revolute[0] = req_vx_;
-      cmd_iws_.steering[0] = req_vw_;
-      pub_cmd_.publish (cmd_iws_);
-    }
-    break;
   case IWS_DIFFDRIVE_COMMANDS:
     if (passthrough_) {
       pub_cmd_.publish (cmd_iws_passthrough_);
@@ -269,6 +258,17 @@ void GamepadNode::publish_commands() {
       }
       cmd_iws_.revolute[0] = vr/config_.wheel_radius;
       cmd_iws_.revolute[1] = vl/config_.wheel_radius;
+      pub_cmd_.publish (cmd_iws_);
+    }
+    break;
+  case IWS_ACKERMANN_COMMANDS:
+    if (passthrough_) {
+      pub_cmd_.publish (cmd_iws_passthrough_);
+    } else {
+      cmd_iws_.header.seq++;
+      cmd_iws_.header.stamp = ros::Time::now();
+      cmd_iws_.revolute[0] = req_vx_;
+      cmd_iws_.steering[0] = req_vw_;
       pub_cmd_.publish (cmd_iws_);
     }
     break;

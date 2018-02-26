@@ -19,32 +19,27 @@
  ***************************************************************************/
 
 #include <ncurses.h>
-#include <tuw_keyboard2twist/tuw_keyboard2twist.h>
+#include <tuw_keyboard/tuw_keyboard.h>
 #include <boost/interprocess/sync/scoped_lock.hpp>
 
 #include <termios.h>
 
 using namespace tuw;
 
-Keyboard2Twist::Keyboard2Twist ( )
+Keyboard::Keyboard ( )
     : quit_ ( false )
-	, control_mode_ ( MODE_NA )
-	, velocity_forward_steps_ ( VELOCITY_FORWARD_STEPS )
-	, velocity_angular_steps_ ( VELOCITY_ANGULAR_STEPS )
-	, velocity_forward_ ( VELOCITY_FORWARD )
-	, velocity_angular_ ( VELOCITY_ANGULAR )
-	, velocity_forward_max_ ( VELOCITY_FORWARD_MAX )
-	, velocity_angular_max_ ( VELOCITY_ANGULAR_MAX ){
+	, velocity_forward_steps_ ( 0 )
+	, velocity_angular_steps_ ( 0 )
+	, velocity_forward_ ( 0 )
+	, velocity_angular_ ( 0 )
+	, velocity_forward_max_ ( 0 )
+	, velocity_angular_max_ ( 0 ){
       
 }
 
-Keyboard2Twist::~Keyboard2Twist () {
-    switch ( control_mode_ ) {
-    case TELEOP:
-        t1.join();
-        endwin(); // End curses mode
-        break;
-    }
+Keyboard::~Keyboard () {
+    t1.join();
+    endwin(); // End curses mode
 }
 
 int getch_noblock()
@@ -61,7 +56,7 @@ int getch_noblock()
   return c;
 }
 
-void Keyboard2Twist::keyboardListener() {
+void Keyboard::keyboardListener() {
     int key;
     int row,col;
     char msg[0xFF];
@@ -132,7 +127,7 @@ void Keyboard2Twist::keyboardListener() {
 }
 
 
-void Keyboard2Twist::initTeleop() {
+void Keyboard::initTeleop() {
 
     initscr();                        // Start curses mode
     raw();                            // Line buffering disabled
@@ -140,5 +135,5 @@ void Keyboard2Twist::initTeleop() {
     noecho();                         // Don't echo() while we do getch
     int row,col;
     char mesg[0xFF];
-    t1 = boost::thread ( &Keyboard2Twist::keyboardListener, this );
+    t1 = boost::thread ( &Keyboard::keyboardListener, this );
 }

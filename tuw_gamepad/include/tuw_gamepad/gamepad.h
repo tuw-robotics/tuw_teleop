@@ -56,9 +56,9 @@ public:
   std::string command_type;
   bool deadman_, passthrough_;
   enum PublisherType {
-    TWIST_DIFFDRIVE_COMMANDS = 0,                // Geometry Msgs / Twist
-    IWS_ACKERMANN_COMMANDS = 1,        // tuw_nav_msgs / JointsIWS [0]/[0]
-    IWS_DIFFDRIVE_COMMANDS = 2        // tuw_nav_msgs / JointsIWS [0]/[0]
+    TWIST_DIFFDRIVE_COMMANDS = 0,                 // Geometry Msgs / Twist
+    IWS_DIFFDRIVE_COMMANDS = 1,                   // tuw_nav_msgs / JointsIWS [0]/[0]
+    IWS_ACKERMANN_COMMANDS = 2                    // tuw_nav_msgs / JointsIWS [0]/[0]
   };
   
   PublisherType publisher_type_;
