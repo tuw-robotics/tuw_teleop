@@ -62,13 +62,13 @@ GamepadNode::GamepadNode (ros::NodeHandle & n)
     break;
   case IWS_ACKERMANN_COMMANDS:
     ROS_INFO ("publisher_type_:  IWS_ACKERMANN_COMMANDS");
-    pub_cmd_ = n_.advertise < tuw_nav_msgs::JointsIWS > ("cmd_vel", 1);
+    pub_cmd_ = n_.advertise < tuw_nav_msgs::JointsIWS > ("joint_cmds", 1);
     cmd_iws_.header.seq = 0;
     cmd_iws_.header.stamp = ros::Time::now();
     cmd_iws_.type_steering = "cmd_position";
     cmd_iws_.type_revolute = "cmd_velocity";
-    cmd_iws_.revolute.resize (1);
-    cmd_iws_.steering.resize (1);
+    cmd_iws_.revolute.resize (2);
+    cmd_iws_.steering.resize (2);
     cmd_iws_passthrough_ = cmd_iws_;
     sub_cmd_passthrough_ = n_.subscribe ("cmd_vel_passthrough", 10, &GamepadNode::callback_iws_passthrough, this);
     break;
@@ -267,8 +267,10 @@ void GamepadNode::publish_commands() {
     } else {
       cmd_iws_.header.seq++;
       cmd_iws_.header.stamp = ros::Time::now();
-      cmd_iws_.revolute[0] = req_vx_;
       cmd_iws_.steering[0] = req_vw_;
+      cmd_iws_.revolute[0] = std::nan("1");
+      cmd_iws_.steering[1] = std::nan("1");
+      cmd_iws_.revolute[1] = req_vx_;
       pub_cmd_.publish (cmd_iws_);
     }
     break;
