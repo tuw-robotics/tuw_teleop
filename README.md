@@ -2,7 +2,7 @@
 Simple nodes to teleoperate vehicles. 
 
 # tuw_gamepad: 
-Nodes optimized for a Logitech F710 Gamepad 
+Default Nodes optimized for a Logitech F510 Gamepad / Launchfile targets F710
 - roslaunch tuw_gamepad gamepad_twist.launch 
 
 # tuw_joy2twist: 
@@ -18,10 +18,8 @@ Depending on parameter 'publisher_type' it publishes:
 # tuw_keyboard2twist: 
 Keyboard teleop node
 - roslaunch tuw_keyboard2twist teleop_keyboard_twist.launch 
-<<<<<<< HEAD
 
 # tuw_gui2iws: (removed)
 graphical interface to control an independent steering platform.
 - roslaunch tuw_gui2iws teleop_gui_iws.launch 
-=======
 
