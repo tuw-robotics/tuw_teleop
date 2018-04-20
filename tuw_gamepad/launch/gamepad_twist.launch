@@ -1,7 +1,7 @@
 <launch>
   <!-- Parameters for a Logitech F710 Gamepad, "MODE" = off and "XID/HID Switch" = X -->
   
-  <arg name="robot_name" default="" />
+  <arg name="robot_name" default="ackermann" />
   <arg name="max_vx" default="2" />
   <arg name="max_vy" default="0" />
   <arg name="max_vw" default="2" />
