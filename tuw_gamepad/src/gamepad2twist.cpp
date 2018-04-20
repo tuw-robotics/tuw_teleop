@@ -66,7 +66,7 @@ public:
 
         n_param_.param ( "axis_vx", axis_vx,  1);
         n_param_.param ( "axis_vy", axis_vy, -1);
-        n_param_.param ( "axis_vw", axis_vw,  0);
+        n_param_.param ( "axis_vw", axis_vw,  3);
 
         n_param_.param ( "axis_vx_discrete", axis_vx_discrete,  7);
         n_param_.param ( "axis_vy_discrete", axis_vy_discrete, -1);
@@ -106,6 +106,8 @@ public:
         ROS_INFO ( "max_vx: %.3f   m/s", max_vx );
         ROS_INFO ( "max_vy: %.3f   m/s", max_vy );
         ROS_INFO ( "max_vw: %.3f rad/s", max_vw );
+
+        ROS_INFO ("publisher type: %d", publisher_type);
 
 
         switch ( publisher_type ) {

@@ -1,18 +1,18 @@
 <launch>
   <!-- Parameters for a Logitech F710 Gamepad, "MODE" = off and "XID/HID Switch" = X -->
   
-  <arg name="robot_name" default="" />
+  <arg name="robot_name" default="ackermann" />
   <arg name="max_vx" default="2" />
   <arg name="max_vy" default="0" />
   <arg name="max_vw" default="2" />
   <arg name="scale"  default="2" />
-  <arg name="gamepad_config" default="logitech_f510_twist.yml" />
+  <arg name="gamepad_config" default="logitech_f710/iws_twist.yaml" />
   <arg name="publisher_type" default="0" />
 
   <!-- run the teleop node to send velocities -->
   <node pkg="tuw_gamepad" type="gamepad2twist" name="teleop"  output="screen" >
 
-    <param name="debug" value="false" />
+    <param name="debug" value="true" />
 
     <param name="max_vx" value="$(arg max_vx)" />
     <param name="max_vy" value="$(arg max_vy)" />
