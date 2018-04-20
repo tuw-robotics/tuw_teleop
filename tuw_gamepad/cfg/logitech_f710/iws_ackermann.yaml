@@ -7,3 +7,4 @@ axis_vx: 1
 axis_vy: 0
 axis_vw: 3
 scale: 2
+length: 0.319 # TODO: Make a seperate robot config / need to coordinate with gazebo plugins
