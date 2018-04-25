@@ -33,6 +33,12 @@ public:
     int axis_vx, axis_vy, axis_vw;
     int axis_vx_discrete, axis_vy_discrete, axis_vw_discrete;
     int deadman_button, scale_button;
+
+    float wheel_base; // length between front and back wheels
+    float wheel_diameter;
+    float steering_width; // length between the car kingpin
+    float steering_angle; // max steering angle of the wheel
+
     bool deadman_no_publish_;
     bool deadman_;
     enum publisher_type_t {
@@ -78,6 +84,12 @@ public:
 
         n_param_.param ( "deadman_button", deadman_button, 5 );
         n_param_.param ( "scale_button", scale_button, 4 );
+
+        n_param_.param ("wheel_base", wheel_base,0.0f);
+        n_param_.param ("wheel_diameter", wheel_diameter,0.0f);
+        n_param_.param ("steering_width", steering_width,0.0f);
+        n_param_.param ("steering_angle", steering_angle,0.0f);
+
 
         double joy_msg_timeout;
         n_param_.param ( "joy_msg_timeout", joy_msg_timeout, -1.0 ); //default to no timeout
@@ -269,8 +281,18 @@ public:
                 pub_cmd_.publish ( cmd_ );
                 break;
             case ACKERMANN_COMMANDS:
-                cmd_iws_.revolute[0] = req_vx;
-                cmd_iws_.steering[0] = req_vw;
+                cmd_iws_.revolute[0] = req_vx / (wheel_diameter / 2.0 );
+
+                // Convert gamepad input into an angle
+                double steering = req_vw * M_PI/(2.0*req_scale);
+
+                double wheel_angle = (sin(steering)/wheel_base);
+
+                // limit angle based on config settings
+                if(wheel_angle > steering_angle) wheel_angle = steering_angle;
+                else if(wheel_angle < -steering_angle) wheel_angle = -steering_angle;
+
+                cmd_iws_.steering[0] = wheel_angle;
                 pub_cmd_.publish ( cmd_iws_ );
                 break;
         }

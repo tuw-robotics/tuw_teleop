@@ -1,6 +1,6 @@
 # Logitech Rumble Gamepad F710 (wireless)
 # switch to Mode 'X' and mode off (no led)
-pubisher_type: 0
+publisher_type: 0
 deadman_button: 5
 scale_button: 4
 axis_vx: 1

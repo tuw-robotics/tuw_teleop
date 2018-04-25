@@ -1,10 +1,13 @@
 # Logitech Rumble Gamepad F710 (wireless)
 # switch to Mode 'X' and mode off (no led)
-pubisher_type: 0
+publisher_type: 1
 deadman_button: 5
 scale_button: 4
 axis_vx: 1
 axis_vy: 0
 axis_vw: 3
 scale: 2
-length: 0.319 # TODO: Make a seperate robot config / need to coordinate with gazebo plugins
+wheel_base: 0.26 # TODO: Make a seperate robot config / need to coordinate with gazebo plugins
+wheel_diameter: 0.065
+steering_width: 0.095
+steering_angle: 0.4
