@@ -286,11 +286,14 @@ public:
                 // Convert gamepad input into an angle
                 double steering = req_vw * M_PI/(2.0*req_scale);
 
+                if(steering > steering_angle) steering = steering_angle;
+                else if(steering < -steering_angle) steering = -steering_angle;
+
                 double wheel_angle = (sin(steering)/wheel_base);
 
                 // limit angle based on config settings
-                if(wheel_angle > steering_angle) wheel_angle = steering_angle;
-                else if(wheel_angle < -steering_angle) wheel_angle = -steering_angle;
+                //if(wheel_angle > steering_angle) wheel_angle = steering_angle;
+                //else if(wheel_angle < -steering_angle) wheel_angle = -steering_angle;
 
                 cmd_iws_.steering[0] = wheel_angle;
                 pub_cmd_.publish ( cmd_iws_ );
