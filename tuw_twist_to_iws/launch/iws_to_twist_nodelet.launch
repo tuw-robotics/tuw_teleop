@@ -1,0 +1,4 @@
+<launch>
+        <node pkg="nodelet" type="nodelet" name="mgr" args="manager"/>
+        <node pkg="nodelet" type="nodelet" name="IwsToTwistNodelet" args="load IwsToTwistNodelet mgr"/>
+</launch>

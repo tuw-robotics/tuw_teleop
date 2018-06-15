@@ -1,0 +1,7 @@
+<library path="lib/libiws_to_twist_nodelet">
+  <class name="TwistToIwsNodelet" type="tuw::TwistToIwsNodelet" base_class_type="nodelet::Nodelet">
+    <description> 
+      A node to add a value and republish.
+    </description>
+  </class>
+</library>
