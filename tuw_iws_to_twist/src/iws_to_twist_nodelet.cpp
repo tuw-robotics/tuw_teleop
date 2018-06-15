@@ -1,15 +1,13 @@
 /**
- * @file joy2cmd_.cpp
- * @author Markus Bader <markus.bader@tuwien.ac.at>
- * @date June 2015
- * @brief Generates twist messages based on joy messages
- * The code is based on the teleop_base.cpp, 2008, Willow Garage and
- * 2010  David Feil-Seifer [dfseifer@usc.edu], Edward T. Kaszubski [kaszubsk@usc.edu]
+ * @file iws_to_twist_nodelet.cpp
+ * @author Felix König <felix.koenig@tuwien.ac.at>
+ * @date June 2018
+ * @brief Generates twist messages based on iws messages
+ *
  */
 
 #include <boost/algorithm/string.hpp>
 #include <tuw_iws_to_twist/iws_to_twist_nodelet.h>
-
 
 using namespace tuw;
 
@@ -21,13 +19,12 @@ IwsToTwistNodelet::~IwsToTwistNodelet()
 {
 }
 
-
 void IwsToTwistNodelet::onInit()
 {
 //  sub_joint_iws_ = getPrivateNodeHandle().subscribe("joint_cmds", 1, (boost::function <void(const tuw_nav_msgs::JointsIWSConstPtr&)>)
 //                                                    boost::bind(&IwsToTwistNodelet::iws_cb, this, _1 ));
   sub_joint_iws_ = getPrivateNodeHandle().subscribe("joint_cmds", 1, &IwsToTwistNodelet::iws_cb, this);
-  pub_joint_iws_ = getPrivateNodeHandle().advertise<geometry_msgs::TwistStamped>("joint_cmds_twist",1000);
+  pub_joint_iws_ = getPrivateNodeHandle().advertise<geometry_msgs::Twist>("cmd_vel",1000);
   std::cout << "node initialized" << std::endl;
 }
 
@@ -39,7 +36,7 @@ void IwsToTwistNodelet::iws_cb(const tuw_nav_msgs::JointsIWSConstPtr &msg)
     return;
   }
   std::string revolute_mode = msg->type_revolute;
-  if (revolute_mode.compare("joint_cmds"))
+  if (revolute_mode.compare("cmd_velocity"))
   {
     ROS_ERROR("IwsToTwistNodelet::iws_cb: revolute command type not supported. Will not set the command.");
     return;
@@ -52,13 +49,15 @@ void IwsToTwistNodelet::iws_cb(const tuw_nav_msgs::JointsIWSConstPtr &msg)
   double omega = (vR - vL) / dummy_wheel_distance;
   double v = (vR - vL) / 2.0;
 
-  twist_stamped_->twist.linear.x = v;
-  twist_stamped_->twist.linear.y = 0.0;
-  twist_stamped_->twist.linear.z = 0.0;
+  twist_->linear.x = v;
+  twist_->linear.y = 0.0;
+  twist_->linear.z = 0.0;
 
-  twist_stamped_->twist.angular.x = 0;
-  twist_stamped_->twist.angular.y = 0;
-  twist_stamped_->twist.angular.z = omega;
+  twist_->angular.x = 0;
+  twist_->angular.y = 0;
+  twist_->angular.z = omega;
+
+  pub_joint_iws_.publish(twist_);
 }
 
 PLUGINLIB_EXPORT_CLASS(tuw::IwsToTwistNodelet, nodelet::Nodelet)

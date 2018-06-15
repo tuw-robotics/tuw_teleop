@@ -8,7 +8,7 @@
 #include <string>
 #include <memory>
 #include <sensor_msgs/Joy.h>
-#include <geometry_msgs/TwistStamped.h>
+#include <geometry_msgs/Twist.h>
 #include <tuw_nav_msgs/JointsIWS.h>
 
 #include <dynamic_reconfigure/server.h>
@@ -33,7 +33,7 @@ namespace tuw {
     ros::Subscriber sub_joint_iws_;
     ros::Publisher pub_joint_iws_;
     void iws_cb(const tuw_nav_msgs::JointsIWSConstPtr &msg);
-    geometry_msgs::TwistStampedPtr twist_stamped_;
+    geometry_msgs::TwistPtr twist_;
 
   };
 }
