@@ -100,6 +100,7 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
   include/
 )
 
@@ -118,10 +119,11 @@ add_dependencies(iws_to_twist_nodelet  ${PROJECT_NAME}_gencfg)
 ## Specify libraries to link a library or executable target against
 target_link_libraries(iws_to_twist_nodelet
    ${catkin_LIBRARIES}
+   ${Boost_LIBRARIES}
 )
 
 add_executable(iws_to_twist_node src/iws_to_twist_node.cpp)
-target_link_libraries(iws_to_twist_node ${catkin_LIBRARIES})
+target_link_libraries(iws_to_twist_node ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 #############
 ## Install ##

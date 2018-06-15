@@ -21,26 +21,24 @@ IwsToTwistNodelet::~IwsToTwistNodelet()
 
 void IwsToTwistNodelet::onInit()
 {
-//  sub_joint_iws_ = getPrivateNodeHandle().subscribe("joint_cmds", 1, (boost::function <void(const tuw_nav_msgs::JointsIWSConstPtr&)>)
-//                                                    boost::bind(&IwsToTwistNodelet::iws_cb, this, _1 ));
-  sub_joint_iws_ = getPrivateNodeHandle().subscribe("joint_cmds", 1, &IwsToTwistNodelet::iws_cb, this);
-  pub_joint_iws_ = getPrivateNodeHandle().advertise<geometry_msgs::Twist>("cmd_vel",1000);
-  std::cout << "node initialized" << std::endl;
+  twist_ = boost::make_shared<geometry_msgs::Twist>();
+  sub_joint_iws_ = getNodeHandle().subscribe("joint_cmds", 1, &IwsToTwistNodelet::iws_cb, this);
+  pub_joint_iws_ = getNodeHandle().advertise<geometry_msgs::Twist>("cmd_vel",1000);
 }
 
 void IwsToTwistNodelet::iws_cb(const tuw_nav_msgs::JointsIWSConstPtr &msg)
 {
-  if (msg->revolute.size() != 2)
-  {
-    ROS_ERROR("IwsToTwistNodelet::iws_cb: message does not contain two revolute commands. Will not set the command.");
-    return;
-  }
-  std::string revolute_mode = msg->type_revolute;
-  if (revolute_mode.compare("cmd_velocity"))
-  {
-    ROS_ERROR("IwsToTwistNodelet::iws_cb: revolute command type not supported. Will not set the command.");
-    return;
-  }
+//  if (msg->revolute.size() != 2)
+//  {
+//    ROS_ERROR("IwsToTwistNodelet::iws_cb: message does not contain two revolute commands. Will not set the command.");
+//    return;
+//  }
+//  std::string revolute_mode = msg->type_revolute;
+//  if (revolute_mode.compare("cmd_velocity"))
+//  {
+//    ROS_ERROR("IwsToTwistNodelet::iws_cb: revolute command type not supported. Will not set the command.");
+//    return;
+//  }
 
   double dummy_wheel_distance = 1.5;
   const double vL = msg->revolute[1];
@@ -49,6 +47,7 @@ void IwsToTwistNodelet::iws_cb(const tuw_nav_msgs::JointsIWSConstPtr &msg)
   double omega = (vR - vL) / dummy_wheel_distance;
   double v = (vR - vL) / 2.0;
 
+  twist_ = boost::make_shared<geometry_msgs::Twist>();
   twist_->linear.x = v;
   twist_->linear.y = 0.0;
   twist_->linear.z = 0.0;
