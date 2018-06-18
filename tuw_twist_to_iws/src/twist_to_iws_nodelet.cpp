@@ -19,6 +19,12 @@ TwistToIwsNodelet::~TwistToIwsNodelet()
 {
 }
 
+void TwistToIwsNodelet::dynamic_reconfigureCB(tuw_twist_to_iws::twist_to_iws_nodeConfig &config, uint32_t level)
+{
+  wheeldiameter = config.wheeldiameter;
+  wheeldistance = config.wheeldistance;
+}
+
 void TwistToIwsNodelet::onInit()
 {
   joint_iws_ = boost::make_shared<tuw_nav_msgs::JointsIWS>();

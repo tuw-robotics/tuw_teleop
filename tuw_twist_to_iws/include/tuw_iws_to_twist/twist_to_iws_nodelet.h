@@ -11,6 +11,7 @@
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Odometry.h>
 #include <tuw_nav_msgs/JointsIWS.h>
+#include <tuw_twist_to_iws/twist_to_iws_nodeConfig.h>
 
 #include <dynamic_reconfigure/server.h>
 
@@ -30,11 +31,15 @@ namespace tuw {
     virtual ~TwistToIwsNodelet();
     virtual void onInit();
 
+    void dynamic_reconfigureCB(tuw_twist_to_iws::twist_to_iws_nodeConfig &config, uint32_t level);
+
   private:
     ros::Subscriber sub_odometry_;
     ros::Publisher pub_joint_iws_;
     void odom_cb(const nav_msgs::OdometryPtr &msg);
     tuw_nav_msgs::JointsIWSPtr joint_iws_;
+    double wheeldiameter;
+    double wheeldistance;
 
   };
 }
