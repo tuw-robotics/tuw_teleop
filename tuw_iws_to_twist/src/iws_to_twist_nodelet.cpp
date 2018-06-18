@@ -22,8 +22,15 @@ IwsToTwistNodelet::~IwsToTwistNodelet()
 void IwsToTwistNodelet::onInit()
 {
   twist_ = boost::make_shared<geometry_msgs::Twist>();
+  dynamic_reconfigure_server = new dynamic_reconfigure::Server<tuw_iws_to_twist::iws_to_twist_nodeConfig>;
   sub_joint_iws_ = getNodeHandle().subscribe("joint_cmds", 1, &IwsToTwistNodelet::iws_cb, this);
   pub_joint_iws_ = getNodeHandle().advertise<geometry_msgs::Twist>("cmd_vel",1000);
+}
+
+void IwsToTwistNodelet::dynamic_reconfigureCB(tuw_iws_to_twist::iws_to_twist_nodeConfig &config, uint32_t level)
+{
+  wheeldiameter = config.wheeldiameter;
+  wheeldistance = config.wheeldistance;
 }
 
 void IwsToTwistNodelet::iws_cb(const tuw_nav_msgs::JointsIWSConstPtr &msg)
@@ -40,12 +47,11 @@ void IwsToTwistNodelet::iws_cb(const tuw_nav_msgs::JointsIWSConstPtr &msg)
 //    return;
 //  }
 
-  double dummy_wheel_distance = 1.5;
   const double vL = msg->revolute[1];
   const double vR = msg->revolute[0];
 
-  double omega = (vR - vL) / dummy_wheel_distance;
-  double v = (vR - vL) / 2.0;
+  double omega = (vR - vL) / wheeldistance;
+  double v = (vR + vL) / 2.0;
 
   twist_ = boost::make_shared<geometry_msgs::Twist>();
   twist_->linear.x = v;

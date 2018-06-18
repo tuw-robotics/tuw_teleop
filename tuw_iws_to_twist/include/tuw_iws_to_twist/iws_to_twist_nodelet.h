@@ -10,6 +10,7 @@
 #include <sensor_msgs/Joy.h>
 #include <geometry_msgs/Twist.h>
 #include <tuw_nav_msgs/JointsIWS.h>
+#include <tuw_iws_to_twist/iws_to_twist_nodeConfig.h>
 
 #include <dynamic_reconfigure/server.h>
 
@@ -29,11 +30,16 @@ namespace tuw {
     virtual ~IwsToTwistNodelet();
     virtual void onInit();
 
+    void dynamic_reconfigureCB(tuw_iws_to_twist::iws_to_twist_nodeConfig &config, uint32_t level);
+
   private:
     ros::Subscriber sub_joint_iws_;
     ros::Publisher pub_joint_iws_;
     void iws_cb(const tuw_nav_msgs::JointsIWSConstPtr &msg);
     geometry_msgs::TwistPtr twist_;
+    dynamic_reconfigure::Server<tuw_iws_to_twist::iws_to_twist_nodeConfig> *dynamic_reconfigure_server;
+    double wheeldiameter;
+    double wheeldistance;
 
   };
 }
