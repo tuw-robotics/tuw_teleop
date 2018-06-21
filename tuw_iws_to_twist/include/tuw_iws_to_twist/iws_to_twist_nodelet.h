@@ -40,6 +40,7 @@ namespace tuw {
     dynamic_reconfigure::Server<tuw_iws_to_twist::iws_to_twist_nodeConfig> *dynamic_reconfigure_server;
     double wheeldiameter;
     double wheeldistance;
+    double wheelradius;
 
   };
 }

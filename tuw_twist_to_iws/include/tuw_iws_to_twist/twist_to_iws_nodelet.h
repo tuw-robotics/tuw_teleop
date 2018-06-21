@@ -32,14 +32,15 @@ namespace tuw {
     virtual void onInit();
 
     void dynamic_reconfigureCB(tuw_twist_to_iws::twist_to_iws_nodeConfig &config, uint32_t level);
+    void odom_cb(const nav_msgs::OdometryPtr &msg);
 
   private:
     ros::Subscriber sub_odometry_;
     ros::Publisher pub_joint_iws_;
-    void odom_cb(const nav_msgs::OdometryPtr &msg);
     tuw_nav_msgs::JointsIWSPtr joint_iws_;
     double wheeldiameter;
     double wheeldistance;
+    double wheelradius;
 
   };
 }

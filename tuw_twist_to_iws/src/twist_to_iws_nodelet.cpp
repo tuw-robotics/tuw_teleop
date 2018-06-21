@@ -8,6 +8,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <tuw_iws_to_twist/twist_to_iws_nodelet.h>
+#include <math.h>
 
 using namespace tuw;
 
@@ -23,13 +24,14 @@ void TwistToIwsNodelet::dynamic_reconfigureCB(tuw_twist_to_iws::twist_to_iws_nod
 {
   wheeldiameter = config.wheeldiameter;
   wheeldistance = config.wheeldistance;
+  wheelradius = wheeldiameter / 2.0;
 }
 
 void TwistToIwsNodelet::onInit()
 {
   joint_iws_ = boost::make_shared<tuw_nav_msgs::JointsIWS>();
   sub_odometry_ = getNodeHandle().subscribe("pose", 1, &TwistToIwsNodelet::odom_cb, this);
-  pub_joint_iws_ = getNodeHandle().advertise<tuw_nav_msgs::JointsIWS>("joint_cmd",1000);
+  pub_joint_iws_ = getNodeHandle().advertise<tuw_nav_msgs::JointsIWS>("joint_measures",1000);
 }
 
 void TwistToIwsNodelet::odom_cb(const nav_msgs::OdometryPtr &msg)
@@ -53,7 +55,14 @@ void TwistToIwsNodelet::odom_cb(const nav_msgs::OdometryPtr &msg)
 //  double omega = (vR - vL) / dummy_wheel_distance;
 //  double v = (vR - vL) / 2.0;
 
-  joint_iws_ = boost::make_shared<tuw_nav_msgs::JointsIWS>();
+  double v = msg->twist.twist.linear.x * M_PI * wheelradius;
+  double omega = msg->twist.twist.angular.z;
+  double vL = 4*v - 2*wheeldistance*omega;
+  double vR = 2*v + vL;
+
+  joint_iws_->revolute[0] = vR;
+  joint_iws_->revolute[1] = vL;
+
   pub_joint_iws_.publish(joint_iws_);
 }
 

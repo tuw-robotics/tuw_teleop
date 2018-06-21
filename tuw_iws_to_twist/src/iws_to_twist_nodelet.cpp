@@ -31,6 +31,7 @@ void IwsToTwistNodelet::dynamic_reconfigureCB(tuw_iws_to_twist::iws_to_twist_nod
 {
   wheeldiameter = config.wheeldiameter;
   wheeldistance = config.wheeldistance;
+  wheelradius = wheeldiameter / 2.0;
 }
 
 void IwsToTwistNodelet::iws_cb(const tuw_nav_msgs::JointsIWSConstPtr &msg)
@@ -47,8 +48,8 @@ void IwsToTwistNodelet::iws_cb(const tuw_nav_msgs::JointsIWSConstPtr &msg)
 //    return;
 //  }
 
-  const double vL = msg->revolute[1];
-  const double vR = msg->revolute[0];
+  const double vL = msg->revolute[1] * wheelradius;
+  const double vR = msg->revolute[0] * wheelradius;
 
   double omega = (vR - vL) / wheeldistance;
   double v = (vR + vL) / 2.0;

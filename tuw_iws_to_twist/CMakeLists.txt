@@ -117,7 +117,7 @@ add_library(iws_to_twist_nodelet src/iws_to_twist_nodelet.cpp)
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 add_dependencies(iws_to_twist_nodelet  ${PROJECT_NAME}_gencfg)
-add_dependencies(iws_to_twist_nodelet  ${PROJECT_NAME}_gencpp)
+#add_dependencies(iws_to_twist_nodelet  ${PROJECT_NAME}_gencpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(iws_to_twist_nodelet
