@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   tf
+  tuw_nav_msgs
   dynamic_reconfigure 
 )
 
