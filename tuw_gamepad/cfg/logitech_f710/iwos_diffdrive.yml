@@ -1,0 +1,15 @@
+# Logitech Wireless Gamepad F710
+# switch to Mode 'X' and mode off (no led)
+command_type: "iwos_diffdrive"
+deadman_button: -1
+scale_button: -1
+axis_vx: 2
+axis_vy: 5
+axis_al: 0
+axis_ar: 3
+button_rev_l: 4
+button_rev_r: 5
+axis_vw: -1
+scale: 2
+wheel_displacement: 0.5
+wheel_radius: 0.075

@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(tuw_gamepad)
 
+cmake_policy(SET CMP0045 OLD)
+cmake_policy(SET CMP0054 OLD)
+
 add_compile_options(-std=c++14) ## for c++ 2014
 
 ## Find catkin macros and libraries

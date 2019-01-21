@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(tuw_keyboard)
+
+cmake_policy(SET CMP0045 OLD)
+cmake_policy(SET CMP0054 OLD)
+
 set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
-
-
 
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
@@ -14,8 +16,6 @@ find_package(catkin REQUIRED COMPONENTS
   tuw_nav_msgs
   dynamic_reconfigure 
 )
-
-
 
 find_package(OpenCV REQUIRED)
 
