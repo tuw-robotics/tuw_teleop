@@ -365,8 +365,8 @@ namespace tuw_teleop
                 } else {
                     this->cmd_iws_.header.seq++;
                     this->cmd_iws_.header.stamp = ros::Time::now();
-                    this->cmd_iws_.revolute[0] = (-this->req_vx_ + 1.0) / 2.0 * this->req_scale_ * (this->button_rev_l_ ? -1 : 1);
-                    this->cmd_iws_.revolute[1] = (-this->req_vy_ + 1.0) / 2.0 * this->req_scale_ * (this->button_rev_r_ ? -1 : 1);
+                    this->cmd_iws_.revolute[0] = (-this->req_vx_ + 1.0) / 2.0 * this->config_.scale * (this->button_rev_l_ ? -1 : 1);
+                    this->cmd_iws_.revolute[1] = (-this->req_vy_ + 1.0) / 2.0 * this->config_.scale * (this->button_rev_r_ ? -1 : 1);
                     this->cmd_iws_.steering[0] = this->req_al_ * this->steering_maximum_;
                     this->cmd_iws_.steering[1] = this->req_ar_ * this->steering_maximum_;
                     this->pub_cmd_.publish(this->cmd_iws_);
