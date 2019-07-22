@@ -252,9 +252,8 @@ void GamepadNode::publish_commands() {
       double v = req_vx_, w = req_vw_;
       double vl = v, vr = v;
       if (fabs (w) > std::numeric_limits<double>::min()) {
-        double R = v*w, l = config_.wheel_displacement;
-        vl = w * (R-l/2.);
-        vr = w * (R+l/2.);
+            vr = (w* config_.wheel_displacement +v *2)/2.;
+            vl = (- w* config_.wheel_displacement +v *2)/2.;
       }
       cmd_iws_.revolute[0] = vr/config_.wheel_radius;
       cmd_iws_.revolute[1] = vl/config_.wheel_radius;
