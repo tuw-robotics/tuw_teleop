@@ -1,0 +1,16 @@
+<launch>
+<!-- comment -->
+<arg name="robot_name" default="r0"/>
+
+
+<group ns="$(arg robot_name)">
+   <node pkg="tuw_patroling" type="patroling.py" name="patroling" output="screen">
+        <rosparam command="load" file="$(find tuw_patroling)/cfg/patroling.yaml" />
+</node>
+
+
+  </group>
+
+</launch>
+
+
