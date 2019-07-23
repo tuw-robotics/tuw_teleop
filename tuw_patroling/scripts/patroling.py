@@ -36,8 +36,8 @@ next_goal_pose = goal_poseA
 def is_it_near_the_goal(robot_x, robot_y, goal_x, goal_y, threshold_in_meters):
     if robot_x < (goal_x + threshold_in_meters) and (robot_x > (goal_x - threshold_in_meters)):
         if robot_y < (goal_y + threshold_in_meters) and (robot_y > (goal_y - threshold_in_meters)):
-            return true
-    return false
+            return True
+    return False
 
 
 def set_next_goal_pose():
@@ -52,8 +52,8 @@ def set_next_goal_pose():
 
 def robot_info_callback(data):
     robot_info = data
-    robot_x = robot_info.pose.position.x
-    robot_y = robot_info.pose.position.y
+    robot_x = robot_info.pose.pose.position.x
+    robot_y = robot_info.pose.pose.position.y
     goal_x = next_goal_pose.pose.position.x
     goal_y = next_goal_pose.pose.position.y
 
@@ -64,12 +64,13 @@ def robot_info_callback(data):
 
 
 def talker():
-    pub = rospy.Publisher('/goal', PoseStamped, queue_size=10)
-    rospy.Subscriber("/r0/robot_info", RobotInfo, robot_info_callback)
+    pub = rospy.Publisher('goal', PoseStamped, queue_size=10)
+    rospy.Subscriber("robot_info", RobotInfo, robot_info_callback)
 
     rate = rospy.Rate(2)  # 10hz
     while not rospy.is_shutdown():
         next_goal_pose.header.stamp = rospy.get_rostime()
+        next_goal_pose.header.frame_id = 'map'
         pub.publish(next_goal_pose)
         rate.sleep()
 
