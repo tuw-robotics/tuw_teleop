@@ -10,14 +10,14 @@ class Patroling:
     def __init__(self, number_of_goals=2):
         self.counter = 0
         self.goal_poses_index = 0
-        rospy.init_node('patroling', anonymous=True)
+        # rospy.init_node('patroling', anonymous=False)
         self.goal_poses = []
         self.number_of_goals = number_of_goals
         self.get_goal_poses()
         self.next_goal_pose = self.goal_poses[self.goal_poses_index]
         self.threshold_in_meters = 0.5
         self.pub = rospy.Publisher('goal', PoseStamped, queue_size=10)
-        self.sub = rospy.Subscriber("robot_info", RobotInfo, self.robot_info_callback)
+        self.sub = rospy.Subscriber('robot_info', RobotInfo, self.robot_info_callback)
         self.rate = rospy.Rate(2)  # 10hz
 
     def get_goal_pose_from_cfg(self, goal_name_identifier):
@@ -49,6 +49,12 @@ class Patroling:
             self.goal_poses_index += 1
             self.goal_poses_index %= self.number_of_goals
             self.next_goal_pose = self.goal_poses[self.goal_poses_index]
+            self.next_goal_pose.header.stamp = rospy.get_rostime()
+            self.next_goal_pose.header.frame_id = 'map'
+            self.next_goal_pose.pose.orientation.z = 0
+
+            rospy.sleep(1.0)
+            self.pub.publish(self.next_goal_pose)
 
     def robot_info_callback(self, robot_info):
         robot_x = robot_info.pose.pose.position.x
@@ -62,12 +68,25 @@ class Patroling:
         # rospy.loginfo(rospy.get_caller_id() + "I heard %s", data.data)
 
     def talker(self):
+        temp_pose = PoseStamped()
+        temp_pose.header.stamp = rospy.get_rostime()
+        temp_pose.header.frame_id = 'map'
+        temp_pose.pose.position.x = 0
+        temp_pose.pose.position.y = 0
+        temp_pose.pose.orientation.x = 0
+        temp_pose.pose.orientation.y = 0
+        temp_pose.pose.orientation.z = 0
+        temp_pose.pose.orientation.w = 1
+        # self.pub.publish(temp_pose)
 
-        while not rospy.is_shutdown():
-            self.next_goal_pose.header.stamp = rospy.get_rostime()
-            self.next_goal_pose.header.frame_id = 'map'
-            self.pub.publish(self.next_goal_pose)
-            self.rate.sleep()
+        self.next_goal_pose.header.stamp = rospy.get_rostime()
+        self.next_goal_pose.header.frame_id = 'map'
+        self.next_goal_pose.pose.orientation.z = 0
+
+        rospy.sleep(1.0)
+        self.pub.publish(self.next_goal_pose)
+        rospy.spin()
+
 
     def get_goal_poses(self):
         for i in range(65, 65 + self.number_of_goals):
@@ -77,6 +96,7 @@ class Patroling:
 
 if __name__ == '__main__':
     try:
+        rospy.init_node('patroling', anonymous=False)
         Patroling_node = Patroling()
         Patroling_node.talker()
     except rospy.ROSInterruptException:

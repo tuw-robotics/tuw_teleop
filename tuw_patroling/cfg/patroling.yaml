@@ -1,12 +1,12 @@
 #Goal Poses
 goal_name_A: "A"
-goal_position_x_A: 3.56
-goal_position_y_A: 5.67
-goal_orientation_z_A: 5.67
-goal_orientation_w_A: 5.67
+goal_position_x_A: -1.13491773
+goal_position_y_A: -0.2857383
+goal_orientation_z_A: 0.99914570
+goal_orientation_w_A: -0.04132
 
 goal_name_B: "B"
-goal_position_x_B: 3.56
-goal_position_y_B: 5.67
-goal_orientation_z_B: 5.67
-goal_orientation_w_B: 5.67
+goal_position_x_B: -7.7422
+goal_position_y_B: -0.47547
+goal_orientation_z_B: -0.99966
+goal_orientation_w_B: -0.0259
