@@ -9,6 +9,7 @@ from geometry_msgs.msg import PoseStamped
 class Patroling:
     def __init__(self):
         self.counter = 0
+        self.wait_time = rospy.get_param("~wait_time", 5)
         self.goal_poses_index = 0
         self.goal_poses = []
         self.number_of_goals = rospy.get_param("~number_of_goals")
@@ -44,7 +45,7 @@ class Patroling:
 
     def set_next_goal_pose(self):
         self.counter += 1
-        if self.counter > 4:
+        if self.counter > self.wait_time:
             self.counter = 0
             self.goal_poses_index += 1
             self.goal_poses_index %= self.number_of_goals
@@ -75,7 +76,6 @@ class Patroling:
         rospy.sleep(1.0)
         self.pub.publish(self.next_goal_pose)
         rospy.spin()
-
 
     def get_goal_poses(self):
         for i in range(65, 65 + self.number_of_goals):

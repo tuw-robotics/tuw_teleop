@@ -1,6 +1,7 @@
 #Goal Poses
 
 number_of_goals: 3 # change if you add a new goal pose
+wait_time: 5 # wait time at goal poses in seconds
 
 goal_name_A: "A"
 goal_position_x_A: -1.13491773
