@@ -1,6 +1,6 @@
 # tuw_patrolling
 
-This node provides the means to make the robot travel between predefined goal poses which are in the **cfg**.yaml file.
+This node provides the means to make the robot travel between predefined goal poses which are in the **patroling**.yaml file.
 
 * ```roslaunch tuw_patroling patroling.launch```
 
@@ -21,6 +21,6 @@ This node provides the means to make the robot travel between predefined goal po
 		
 #### Changing the waiting time at goal poses:
 
-* Change the **wait_time** parameter in the **cfg** file which reflects the waiting time in seconds.
+* Change the **wait_time** parameter in the **patroling** file which reflects the waiting time in seconds.
  
 * The waiting time is determined by the frequency of _robot info_ callback. By default this is 1 Hz so if an unexpected wait time occours, checking the _robot info_ frequency is the first thing to do.
