@@ -11,7 +11,6 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   geometry_msgs
-  tuw_geometry
   tuw_nav_msgs
   dynamic_reconfigure
 )
