@@ -12,10 +12,8 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tf
   tuw_nav_msgs
-  dynamic_reconfigure 
+  dynamic_reconfigure
 )
-
-
 
 find_package(OpenCV REQUIRED)
 
