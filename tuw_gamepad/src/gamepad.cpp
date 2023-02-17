@@ -244,16 +244,21 @@ void GamepadNode::publish_commands() {
     }
     break;
   case IWS_DIFFDRIVE_COMMANDS:
-    if (passthrough_) {
+    if (passthrough_)
+    {
       pub_cmd_.publish (cmd_iws_passthrough_);
-    } else {
+    }
+    else
+    {
       cmd_iws_.header.seq++;
       cmd_iws_.header.stamp = ros::Time::now();
-      double v = req_vx_, w = req_vw_;
+      double v = req_vx_;
+      double w = req_vw_;
       double vl = v, vr = v;
-      if (fabs (w) > std::numeric_limits<double>::min()) {
-            vr = (w* config_.wheel_displacement +v *2)/2.;
-            vl = (- w* config_.wheel_displacement +v *2)/2.;
+      if (fabs (w) > std::numeric_limits<double>::min())
+      {
+        vr = v + w * (config_.wheel_displacement / 2.0);
+        vl = v - w * (config_.wheel_displacement / 2.0);
       }
       cmd_iws_.revolute[0] = vr/config_.wheel_radius;
       cmd_iws_.revolute[1] = vl/config_.wheel_radius;
