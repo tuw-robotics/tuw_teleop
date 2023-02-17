@@ -1,29 +1,31 @@
 # tuw_teleop
 Simple nodes to teleoperate vehicles. 
 
-<<<<<<< HEAD
-# tuw_gamepad: 
-Nodes optimized for a Logitech F710 Gamepad 
-- roslaunch tuw_gamepad gamepad_twist.launch 
-=======
-# tuw_joy2twist: 
-Works with any Joystick/Gamepad supported by ros-joy / joy_node
-Configure different controllers (button and axis assignment) with yaml files
-in the cfg directory.
-Depending on parameter 'publisher_type' it publishes:
-- case 0: geometry_msgs/Twist
-- case 1: tuw_nav_msgs/JointsIWS using 1+1 (1 steering, 1 revolute)
+## tuw_teleop
+Metapackage.
 
-- roslaunch tuw_joy2twist teleop_joy2twist.launch gamepad:=logitech_f510 publisher_type:=0
->>>>>>> 3d5d39d7fc1258aeb18ad95effc15cf4845ddfcd
+## tuw_gamepad: 
+Node optimized for the Logitech F510 and Logitech F710 Gamepad to publish [`geometry_msgs/Twist`][geometry_msgs/Twist] and [`tuw_msgs/JointsIWS`][tuw_msgs/JointsIWS].
 
-# tuw_keyboard2twist: 
-Keyboard teleop node
-- roslaunch tuw_keyboard2twist teleop_keyboard_twist.launch 
-<<<<<<< HEAD
+There are various launch files for the different configurations to operate this node.
 
-# tuw_gui2iws: (removed)
-graphical interface to control an independent steering platform.
-- roslaunch tuw_gui2iws teleop_gui_iws.launch 
-=======
->>>>>>> 3d5d39d7fc1258aeb18ad95effc15cf4845ddfcd
+To utilize the controller to steer a differential drive robot with `geometry_msgs/Twist` use:
+```bash
+  roslaunch tuw_gamepad twist_diffdrive.launch 
+```
+
+To utilize the controller to steer a differential drive robot with `tuw_msgs/JointsIWS` use:
+```bash
+  roslaunch tuw_gamepad iws_diffdrive.launch 
+```
+
+[geometry_msgs/Twist]: https://docs.ros.org/en/lunar/api/geometry_msgs/html/msg/Twist.html
+[tuw_msgs/JointsIWS]: https://github.com/tuw-robotics/tuw_msgs/blob/master/tuw_nav_msgs/msg/JointsIWS.msg
+
+**Note:** The Logitech controller should be set to mode "X" (not "D") on the rear of the controller in order to behave properly.
+
+## tuw_keyboard:
+Node to publish commands based on keyboard input.
+
+## tuw_patroling:
+Node to publish predefined goals for the robot.
