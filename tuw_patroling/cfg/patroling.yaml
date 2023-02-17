@@ -1,0 +1,22 @@
+#Goal Poses
+
+number_of_goals: 3 # change if you add a new goal pose
+wait_time: 5 # wait time at goal poses in seconds
+
+goal_name_A: "A"
+goal_position_x_A: -1.13491773
+goal_position_y_A: -0.2857383
+goal_orientation_z_A: 0.99914570
+goal_orientation_w_A: -0.04132
+
+goal_name_B: "B"
+goal_position_x_B: -7.7422
+goal_position_y_B: -0.47547
+goal_orientation_z_B: -0.99966
+goal_orientation_w_B: -0.0259
+
+goal_name_C: "C"
+goal_position_x_C: 4.798
+goal_position_y_C: -0.925
+goal_orientation_z_C: -0.455
+goal_orientation_w_C: -0.890

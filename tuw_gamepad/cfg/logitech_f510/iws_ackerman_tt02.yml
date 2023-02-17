@@ -1,0 +1,10 @@
+# Logitech Rumble Gamepad F510 (wired)
+# Vechile: Race Car, Tamiya 1:10 RC TT-02R Chassis
+# switch to Mode 'X' and mode off (no led)
+command_type: "iws_ackermann"
+deadman_button: 4
+scale_button: 5
+axis_vx: 1
+axis_vy: 0
+axis_vw: 3
+scale: 2

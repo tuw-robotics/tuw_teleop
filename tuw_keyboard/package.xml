@@ -1,10 +1,12 @@
 <?xml version="1.0"?>
 <package>
-  <name>tuw_keyboard2twist</name>
+  <name>tuw_keyboard</name>
   <version>0.0.0</version>
-  <description>The tuw_keyboard2twist package</description>
+  <description>The tuw_keyboard package</description>
 
-  <maintainer email="todorangrg@gmail.com">George Todoran</maintainer>
+  <maintainer email="markus.bader@tuwien.ac.at">Markus Bader</maintainer>
+  <author email="todorangrg@gmail.com">George Todoran</author>
+  <author email="markus.bader@tuwien.ac.at">todorangrg</author>
 
   <license>BSD</license>
 
@@ -15,15 +17,19 @@
   <build_depend>sensor_msgs</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>tf</build_depend>
+  <build_depend>tuw_nav_msgs</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
-  
+  <build_depend>libncurses-dev</build_depend>
+
   <run_depend>geometry_msgs</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>rospy</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>tf</run_depend>
+  <run_depend>tuw_nav_msgs</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
+  <run_depend>libncurses-dev</run_depend>
 
   <export>
       
