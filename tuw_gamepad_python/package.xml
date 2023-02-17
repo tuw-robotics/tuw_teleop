@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>tuw_gamepad_python</name>
+  <version>0.0.0</version>
+  <description>Publisher fot different messages based on gamepad input</description>
+
+  <maintainer email="eugen.kaltenegger@gmail.com">Eugen Kaltenegger</maintainer>
+
+  <license>BSD</license>
+
+  <author email="eugen.kaltenegger@gmail.com">Eugen Kaltenegger</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roslaunch</build_depend>
+  <build_depend>roslint</build_depend>
+  <build_depend>rospy</build_depend>
+
+  <exec_depend>dynamic_reconfigure</exec_depend>
+  <exec_depend>rospy</exec_depend>
+
+  <depend>geometry_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>tuw_nav_msgs</depend>
+
+  <export>
+    <!--nothing to export -->
+  </export>
+
+</package>

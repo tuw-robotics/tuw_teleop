@@ -1,0 +1,186 @@
+#!/usr/bin/env python3
+
+import os.path
+
+import rospy
+import rospkg
+
+from dynamic_reconfigure.server import Server
+from rospy import Publisher
+from rospy import Subscriber
+from sensor_msgs.msg import Joy
+from typing import Any, List
+from typing import Dict
+from typing import NoReturn
+from typing import Optional
+
+from tuw_gamepad_python.cfg import GamepadDynamicConfig
+
+from tuw_gamepad_python.utilities.config_modifier import ConfigModifier, EnumItem
+from tuw_gamepad_python.device.mapping import Mapping
+from tuw_gamepad_python.converter.abstract_converter import AbstractConverter
+from tuw_gamepad_python.converter.implementation.iwos_orientation_converter import IWOSOrientationConverter
+from tuw_gamepad_python.converter.implementation.pass_through_converter import PassThroughConverter
+
+
+class GamepadNode:
+    """
+    class of the gamepad node
+    creates a subscriber for sensor_msgs.Joy (on topic "/jpy) from a gamepad and
+    converts them to other message types and publishes these messages (on topic "cmd")
+    """
+
+    def __init__(self) -> None:
+        self.subscriber_topic: str = "/joy"
+        self.publisher_topic: str = "/cmd"
+        self.subscriber: Optional[Subscriber] = None
+        self.publisher: Optional[Publisher] = None
+        self.reconfigure_server: Optional[Server] = None
+        self.mapping: Optional[Mapping] = None
+        self.converter: Optional[AbstractConverter] = None
+
+        self.mappings: Dict[str, Mapping] = {}
+        self.converters: Dict[str, AbstractConverter] = {}
+
+    def run(self) -> NoReturn:
+        rospy.init_node("GAMEPAD_NODE")
+
+        self.mappings = self.create_mapping_dict()
+        self.converters = self.create_converter_dict()
+
+        # create mapping instance
+        default_mapping = rospy.get_param(rospy.get_name() + "/device", default="LogitechF710")
+        self.mapping = self.get_mapping_instance(default_mapping)
+        mapping_config_list = [EnumItem(name=x, value=x, description=x) for x in self.mappings.keys()]
+        ConfigModifier.change_enum_items(GamepadDynamicConfig, "device", mapping_config_list, default_mapping)
+
+        # create converter instance
+        default_converter = rospy.get_param(rospy.get_name() + "/converter", default="PassThrough")
+        self.converter = self.get_converter_instance(default_converter)
+        converter_config_list = [EnumItem(name=x, value=x, description=x) for x in self.converters.keys()]
+        ConfigModifier.change_enum_items(GamepadDynamicConfig, "converter", converter_config_list, default_converter)
+
+        self.subscriber = Subscriber(self.subscriber_topic, Joy, self.callback)
+        self.reconfigure_server = Server(GamepadDynamicConfig, self.reconfigure_callback)
+
+        rospy.spin()
+
+    def setup_publisher(self, publisher_topic: str, message_type: Any) -> None:
+        if self.publisher is not None:
+            self.publisher.unregister()
+            self.publisher = None
+
+        self.publisher = Publisher(name=publisher_topic, data_class=message_type, queue_size=10)
+
+    def callback(self, input_message: Joy) -> None:
+        """
+        receive a sensor_msgs.Joy message and forward it to the converter (where it is converted and published)
+        :param input_message: message to convert and publish
+        :return: None
+        """
+        if not self.mapping:
+            rospy.logerr("No mapping found")
+
+        if not self.converter:
+            rospy.logerr("No converter found")
+
+        output_message = self.converter.convert(input_message=self.mapping.map(input_message=input_message))
+        if output_message is not None:
+            self.publisher.publish(output_message)
+
+    def reconfigure_callback(self, config: Dict[str, Any], level: int) -> Dict[str, Any]:
+        """
+        callback for dynamic reconfigure
+        :param config: config dict from dynamic reconfigure server
+        :param level: level of dynamic reconfigure change
+        :return: config
+        """
+        if level == -1:
+            return config
+
+        if not config["device"] == self.mapping.get_name():
+            self.mapping = self.get_mapping_instance(config["device"])
+
+        if not config["converter"] == self.converter.get_name():
+            self.converter = self.get_converter_instance(config["converter"])
+
+        return config
+
+    @staticmethod
+    def create_converter_dict() -> Dict[str, AbstractConverter]:
+        """
+        create a dict of all converters
+        :return: dict of all converters (keys: converter names, items: converter instances)
+        """
+        return {
+            # add new converters here
+            PassThroughConverter.get_name(): PassThroughConverter(),
+            IWOSOrientationConverter.get_name(): IWOSOrientationConverter()
+        }
+
+    @staticmethod
+    def create_mapping_dict() -> Dict[str, Mapping]:
+        """
+        create a dict of all device mappings
+        :return: dict of all device mappings (keys: device names, items: mapping instances)
+        """
+        package_path: str = rospkg.RosPack().get_path("tuw_gamepad_python")
+        config_path: str = os.path.join(package_path, "cfg", "device")
+        config_file_list: List[str] = os.listdir(config_path)
+
+        mapping_dict: Dict[str, Mapping] = {}
+        for config_file in config_file_list:
+            assert len(config_file.split(".")) == 2
+            name = config_file.split(".")[0]
+            ending = config_file.split(".")[1]
+
+            if ending == "yaml":
+                mapping_config_path = os.path.join(config_path, config_file)
+                mapping_dict[name] = Mapping(device_name=name, device_config_path=mapping_config_path)
+            if ending != "yaml":
+                rospy.logerr("invalid config file found (only \".yaml\" supported but \"{}\" found)".format(ending))
+
+        return mapping_dict
+
+    def get_converter_instance(self, converter_name: str) -> AbstractConverter:
+        """
+        get an instance of a converter and register the publisher
+        (unregisters previously registered publisher if existing)
+        :param converter_name: desired converter
+        :return: desired converter, exit if no such converter exists
+        """
+        if converter_name in self.converters:
+            rospy.loginfo("converter found: {}".format(converter_name))
+
+            # unregister publisher of old converter if existing
+            if self.publisher is not None and self.publisher.get_num_connections() > 0:
+                rospy.logerr("there is at least one subscriber to the topic {}, "
+                             "unregistering that topic might cause problems".format(self.publisher_topic))
+
+            converter: AbstractConverter = self.converters[converter_name]
+            # register publisher of new converter
+            self.setup_publisher(publisher_topic=self.publisher_topic, message_type=converter.get_message_type())
+
+            return converter
+
+        if converter_name not in self.converters:
+            rospy.logerr("converter NOT found: {}".format(converter_name))
+            exit(0)
+
+    def get_mapping_instance(self, mapping_name: str) -> Mapping:
+        """
+        get an instance of a device mapping
+        :param mapping_name: desired device mapping
+        :return: desired device mapping, exit if no such converter exists
+        """
+        if mapping_name in self.mappings:
+            rospy.loginfo("device config found: {}".format(mapping_name))
+            return self.mappings[mapping_name]
+
+        if mapping_name not in self.mappings:
+            rospy.loginfo("device config NOT found: {}".format(mapping_name))
+            exit(0)
+
+
+if __name__ == "__main__":
+    GamepadNode().run()

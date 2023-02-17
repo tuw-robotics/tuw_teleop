@@ -1,0 +1,26 @@
+#!/usr/bin/env python3
+
+"""
+Constants to access the according elements in the sensor_msgs.Joy messages after mapping
+"""
+
+# axes constants
+LEFT_JOY_LEFT_RIGHT = 0
+LEFT_JOY_UP_DOWN = 1
+RIGHT_JOY_LEFT_RIGHT = 2
+RIGHT_JOY_UP_DOWN = 3
+LEFT_TRIGGER = 4
+RIGHT_TRIGGER = 5
+CROSS_LEFT_RIGHT = 6
+CROSS_UP_DOWN = 7
+
+A_BUTTON = 0
+B_BUTTON = 1
+X_BUTTON = 2
+Y_BUTTON = 3
+LEFT_SHOULDER_BUTTON = 4
+RIGHT_SHOULDER_BUTTON = 5
+LEFT_JOY_BUTTON = 6
+RIGHT_JOY_BUTTON = 7
+SELECT_BUTTON = 8
+START_BUTTON = 9

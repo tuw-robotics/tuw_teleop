@@ -1,0 +1,23 @@
+# Mapping for the Logitech F710 Controller (X)
+
+axes:
+  x_left: 0         # left axis stick left/right
+  y_left: 1         # left axis stick up/down
+  x_right: 3        # right axis stick left/right
+  y_right: 4        # right axis stick up/down
+  trigger_left: 2   # left trigger
+  trigger_right: 5  # right trigger
+  x_cross: 6        # cross key left/right
+  y_cross: 7        # cross key up/down
+
+buttons:
+  a_button: 0       # a button
+  b_button: 1       # b button
+  x_button: 2       # x button
+  y_button: 3       # y button
+  shoulder_left: 4  # left shoulder button
+  shoulder_right: 5 # right shoulder button
+  joy_left: 9       # left joystick button
+  joy_right: 10     # right joystick button
+  select: 6         # select / back button
+  start: 7          # start button

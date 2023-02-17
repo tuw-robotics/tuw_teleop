@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+
+<launch>
+
+    <arg name="converter" default="IWOSOrientation" />
+    <arg name="device" default="LogitechF710" />
+    <arg name="origin_topic" default="joy" />
+    <arg name="target_topic" default="cmd" />
+
+    <node pkg="tuw_gamepad_python" type="gamepad_node" name="gamepad_node"  output="screen" >
+        <param name="converter" value="$(arg converter)" />
+        <param name="device" value="$(arg device)" />
+        <remap from="joy" to="$(arg origin_topic)"/>
+        <remap from="cmd" to="$(arg target_topic)"/>
+    </node>
+
+    <node pkg="joy" type="joy_node" name="joy_controller" >
+        <remap from="jopy" to="$(arg origin_topic)"/>
+        <param name="autorepeat_rate" value="5" />
+    </node>
+
+</launch>
