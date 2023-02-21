@@ -19,7 +19,7 @@ from tuw_gamepad_python.cfg import GamepadDynamicConfig
 from tuw_gamepad_python.utilities.config_modifier import ConfigModifier, EnumItem
 from tuw_gamepad_python.device.mapping import Mapping
 from tuw_gamepad_python.converter.abstract_converter import AbstractConverter
-from tuw_gamepad_python.converter.implementation.iwos_orientation_converter import IWOSOrientationConverter
+from tuw_gamepad_python.converter.implementation.joy_to_twist_with_orientation import JoyToTwistWithOrientation
 from tuw_gamepad_python.converter.implementation.pass_through_converter import PassThroughConverter
 
 
@@ -115,7 +115,7 @@ class GamepadNode:
         return {
             # add new converters here
             PassThroughConverter.get_name(): PassThroughConverter(),
-            IWOSOrientationConverter.get_name(): IWOSOrientationConverter()
+            JoyToTwistWithOrientation.get_name(): JoyToTwistWithOrientation()
         }
 
     @staticmethod

@@ -16,8 +16,8 @@ from tuw_gamepad_python.device.index_constants import *
 from tuw_gamepad_python.converter.abstract_converter import AbstractConverter
 
 
-class IWOSOrientationConverter(AbstractConverter[TwistWithOrientation]):
-    NAME = "IWOSOrientation"
+class JoyToTwistWithOrientation(AbstractConverter[TwistWithOrientation]):
+    NAME = "TwistWithOrientation"
 
     def __init__(self):
         super().__init__(message_type=TwistWithOrientation)
@@ -35,7 +35,7 @@ class IWOSOrientationConverter(AbstractConverter[TwistWithOrientation]):
 
     @staticmethod
     def get_name() -> str:
-        return IWOSOrientationConverter.NAME
+        return JoyToTwistWithOrientation.NAME
 
     def convert(self, input_message: Joy) -> Optional[TwistWithOrientation]:
         if not any(input_message.buttons[button] for button in self.deadman_buttons):

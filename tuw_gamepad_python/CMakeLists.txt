@@ -15,8 +15,9 @@ roslint_python()
 catkin_python_setup()
 
 generate_dynamic_reconfigure_options(
-        cfg/gamepad_dynamic_config.cfg
-        cfg/converter/iwos_orientation_dynamic_config.cfg
+  cfg/gamepad_dynamic_config.cfg
+  # add config here
+  cfg/converter/joy_to_twist_with_orientation_config.cfg
 )
 
 catkin_package()
