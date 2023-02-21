@@ -17,6 +17,7 @@ catkin_python_setup()
 generate_dynamic_reconfigure_options(
   cfg/gamepad_dynamic_config.cfg
   cfg/converter/twist_with_orientation_for_iwos_config.cfg
+  cfg/converter/joints_iws_for_iwos_config.cfg
   # add converter config here
 )
 

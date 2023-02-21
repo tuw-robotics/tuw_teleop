@@ -19,9 +19,10 @@ from tuw_gamepad_python.cfg import GamepadDynamicConfig
 from tuw_gamepad_python.utilities.config_modifier import ConfigModifier, EnumItem
 from tuw_gamepad_python.device.mapping import Mapping
 from tuw_gamepad_python.converter.abstract_converter import AbstractConverter
-from tuw_gamepad_python.converter.implementation.joy_to_twist_with_orientation_for_iwos import JoyToTwistWithOrientationForIwos
-from tuw_gamepad_python.converter.implementation.pass_through_converter import PassThroughConverter
 
+from tuw_gamepad_python.converter.pass_through_converter import PassThroughConverter
+from tuw_gamepad_python.converter.implementation.joints_iws_for_iwos import JointsIwsForIwos
+from tuw_gamepad_python.converter.implementation.twist_with_orientation_for_iwos import TwistWithOrientationForIwos
 
 class GamepadNode:
     """
@@ -113,9 +114,10 @@ class GamepadNode:
         :return: dict of all converters (keys: converter names, items: converter instances)
         """
         return {
-            # add new converters here
             PassThroughConverter.get_name(): PassThroughConverter(),
-            JoyToTwistWithOrientationForIwos.get_name(): JoyToTwistWithOrientationForIwos()
+            TwistWithOrientationForIwos.get_name(): TwistWithOrientationForIwos(),
+            JointsIwsForIwos.get_name(): JointsIwsForIwos(),
+            # add new converters here
         }
 
     @staticmethod
