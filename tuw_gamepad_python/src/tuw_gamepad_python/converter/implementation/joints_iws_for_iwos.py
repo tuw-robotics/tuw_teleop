@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import math
 import rospy
 import tf
 
@@ -20,6 +21,7 @@ from tuw_gamepad_python.converter.abstract_converter import AbstractConverter
 
 class JointsIwsForIwos(AbstractConverter[JointsIWS]):
     NAME = "JointsIwsForIwos"
+    ANGULAR_VELOCITY_THRESHOLD = 0.01
 
     def __init__(self):
         super().__init__(message_type=JointsIWS)
@@ -30,13 +32,7 @@ class JointsIwsForIwos(AbstractConverter[JointsIWS]):
             "angular_velocity": LEFT_JOY_LEFT_RIGHT,
             "orientation": RIGHT_JOY_LEFT_RIGHT}
         self.deadman = [RIGHT_SHOULDER_BUTTON, LEFT_SHOULDER_BUTTON]
-        self.last_alive_message: Optional[JointsIWS] = None
-        self.message: JointsIWS = JointsIWS(
-            header=Header(seq=0, stamp=rospy.get_rostime(), frame_id="base_link"),
-            type_steering="cmd_position",
-            type_revolute="cmd_velocity",
-            steering=[0.0, 0.0],
-            revolute=[0.0, 0.0])
+        self.message: Optional[JointsIWS] = None
         self.reconfigure_server = Server(type=JointsIwsForIwosConfig,
                                          callback=self.reconfigure_callback,
                                          namespace=self.get_name())
@@ -48,7 +44,7 @@ class JointsIwsForIwos(AbstractConverter[JointsIWS]):
 
     def convert(self, input_message: Joy) -> Optional[JointsIWS]:
         if not any(input_message.buttons[button] for button in self.deadman):
-            if self.last_alive_message is None:
+            if self.message is None:
                 return None
             else:
                 return JointsIWS(
@@ -58,41 +54,75 @@ class JointsIwsForIwos(AbstractConverter[JointsIWS]):
                     steering=self.message.steering,
                     revolute=[0.0, 0.0])
 
-        linear_velocity: float = input_message.axes[self.control["linear_velocity"]] * self.config["linear_velocity_scale"]
-        angular_velocity: float = input_message.axes[self.control["angular_velocity"]] * self.config["angular_velocity_scale"]
-        orientation: float = input_message.axes[self.control["orientation"]] * self.config["orientation_scale"]
+        if self.message is None:
+            self.message = JointsIWS(
+                header=Header(seq=0, stamp=rospy.get_rostime(), frame_id="base_link"),
+                type_steering="cmd_position",
+                type_revolute="cmd_velocity",
+                steering=[0.0, 0.0],
+                revolute=[0.0, 0.0])
+
+        linear_velocity: float = input_message.axes[self.control["linear_velocity"]]
+        angular_velocity: float = input_message.axes[self.control["angular_velocity"]]
+        orientation: float = input_message.axes[self.control["orientation"]]
 
         target_revolute: Dict[str, float] = {"left": 0.0, "right": 0.0}
-        target_steering: Dict[str, float] = {"left": -orientation, "right": -orientation}
+        target_steering: Dict[str, float] = {"left": 0.0, "right": 0.0}
 
-        if abs(angular_velocity) < self.config.angular_velocity_threashold:
-            target_revolute["left"] = linear_velocity
-            target_revolute["right"] = linear_velocity
+        if self.config.calculation_mode == 0:
+            orientation_scale = self.config.orientation_scale
+            linear_scale = self.config.circular_linear_velocity_scale
+            angular_scale = self.config.circular_angular_velocity_scale
 
-        if not abs(angular_velocity) < self.config.angular_velocity_threashold:
-            v: float = linear_velocity
-            w: float = angular_velocity
-            b: float = self.lookup_wheel_displacement()
+            target_steering["left"] = -orientation * orientation_scale
+            target_steering["right"] = -orientation * orientation_scale
 
-            target_revolute["left"] = w * ((v / w) - b / 2.0)
-            target_revolute["right"] = w * ((v / w) + b / 2.0)
+            norm = math.sqrt(math.pow(linear_velocity, 2) + math.pow(angular_velocity, 2))
+            if norm > 1:
+                linear_velocity = linear_velocity / norm
+                angular_velocity = angular_velocity / norm
 
-        # self.message.header.seq = self.message.header.seq + 1
+            linear_velocity *= linear_scale
+            angular_velocity *= angular_scale
+
+            target_revolute["left"] = linear_velocity - angular_velocity
+            target_revolute["right"] = linear_velocity + angular_velocity
+
+        if self.config.calculation_mode == 1:
+            orientation_scale = self.config.orientation_scale
+            linear_scale = self.config.twist_linear_velocity_scale
+            angular_scale = self.config.twist_angular_velocity_scale
+
+            target_steering["left"] = -orientation * orientation_scale
+            target_steering["right"] = -orientation * orientation_scale
+
+            if abs(angular_velocity) < JointsIwsForIwos.ANGULAR_VELOCITY_THRESHOLD:
+                target_revolute["left"] = linear_velocity
+                target_revolute["right"] = linear_velocity
+
+            if not abs(angular_velocity) < JointsIwsForIwos.ANGULAR_VELOCITY_THRESHOLD:
+                v: float = linear_velocity * linear_scale
+                w: float = angular_velocity * angular_scale
+                b: float = self.lookup_wheel_displacement()
+
+                target_revolute["left"] = w * ((v / w) - b / 2.0)
+                target_revolute["right"] = w * ((v / w) + b / 2.0)
+
+        if abs(target_revolute["left"]) > self.config.maximum_velocity or \
+           abs(target_revolute["right"]) > self.config.maximum_velocity:
+
+            scale = max(abs(target_revolute["left"]), abs(target_revolute["right"]))
+            for side in ["left", "right"]:
+                target_revolute[side] = self.config.maximum_velocity * (target_revolute[side] / scale)
+
         self.message.header.stamp = rospy.get_rostime()
 
         self.message.revolute = [target_revolute["left"], target_revolute["right"]]
         self.message.steering = [target_steering["left"], target_steering["right"]]
 
-        self.last_alive_message = self.message
-
         return self.message
 
     def reconfigure_callback(self, config: Dict[str, Any], level: int) -> Dict[str, Any]:
-        for config_parameter in ["linear_velocity_scale", "angular_velocity_scale", "orientation_scale"]:
-            if config_parameter not in config:
-                rospy.logerr("missing parameter {} in dynamic reconfigure - "
-                             "changes have not been applied".format("orientation_scale"))
-
         if self.config != config:
             self.config = config
 
@@ -106,7 +136,7 @@ class JointsIwsForIwos(AbstractConverter[JointsIWS]):
         for side, value in translation.items():
             target_link = "wheel_link_" + side
             try:
-                value, _ = tf_listener.lookupTransform('base_link', target_link,  rospy.Time(0))
+                value, _ = tf_listener.lookupTransform('base_link', target_link, rospy.Time(0))
                 if value is not None:
                     translation[side] = value
                 if value is None:
