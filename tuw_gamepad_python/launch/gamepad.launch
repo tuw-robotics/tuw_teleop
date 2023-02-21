@@ -2,7 +2,7 @@
 
 <launch>
 
-    <arg name="converter" default="TwistWithOrientation" />
+    <arg name="converter" default="TwistWithOrientationForIwos" />
     <arg name="device" default="LogitechF710" />
     <arg name="origin_topic" default="joy" />
     <arg name="target_topic" default="cmd" />
