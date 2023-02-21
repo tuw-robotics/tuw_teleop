@@ -38,8 +38,14 @@ Makefile
 cmake_install.cmake
 install_manifest.txt
 
+# Jetbrains IDE
+.idea
+
 # Kdevelop
 *.kdev4
 .kdev4*
 *~
 *swp
+
+# Python
+__pycache__
