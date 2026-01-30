@@ -1,3 +1,0 @@
-<launch>
-        <node name="iws_to_twist_node" pkg="tuw_iws_to_twist" type="iws_to_twist_node" />
-</launch>
